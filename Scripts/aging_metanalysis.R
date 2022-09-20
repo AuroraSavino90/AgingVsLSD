@@ -1,9 +1,9 @@
 rm(list=ls())
-setwd("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVSLSD")
+setwd("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVsLSD")
 
 library(ggplot2)
-load("RData/DE_GSE179379.RData")
-load("RData/Alldata_7Jul.RData")
+load("Results/RData/DE_GSE179379.RData")
+load("Results/RData/Alldata_20Sep.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
 
 library(pheatmap)
@@ -19,6 +19,7 @@ dev.off()
 metadata$Diagnosis<-factor(metadata$Diagnosis, levels=names(sort(table(metadata$Diagnosis), decreasing = T)))
 metadata$Region_simpl<-factor(metadata$Region_simpl, levels=names(sort(table(metadata$Region_simpl), decreasing = T)))
 metadata$Race<-factor(metadata$Race, levels=names(sort(table(metadata$Race), decreasing = T)))
+
 
 pdf("Results/Figures/Gender_frequency.pdf",2,5)
 ggplot(metadata, aes(x=Gender))+geom_bar()+theme_classic()
@@ -38,13 +39,13 @@ dev.off()
 
 ####Rappresentare il range di et? di ogni dataset
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens"]))
-binned<-matrix(nrow=length(dat), ncol=100)
+binned<-matrix(nrow=length(dat), ncol=max(as.numeric(metadata$Age)/365, na.rm=T))
 rownames(binned)<-dat
 age_median<-c()
 for(dd in dat){
     age<-round(as.numeric(metadata$Age[which(metadata$Dataset==dd & metadata$Organism=="Homo sapiens")]))
     age_median<-c(age_median, median(age, na.rm = T))
-    for(bin in 1:100){
+    for(bin in 1:max(as.numeric(metadata$Age)/365, na.rm=T)){
     age_bin<-c(((bin-1)*365+1):(bin*365))
     if(length(which(age %in% intersect(age_bin, age)))>0){
       binned[dd,bin]<-length(which(age %in% intersect(age_bin, age)))
@@ -54,8 +55,9 @@ for(dd in dat){
 
   }
 }
-colnames(binned)<-c(1:100)
+colnames(binned)<-c(1:max(as.numeric(metadata$Age)/365, na.rm=T))
 binned<-binned[order(age_median),]
+dev.off()
 pdf("Results/Figures/age_datasets.pdf", 16, 6)
 pheatmap(log2(binned+1), cluster_cols = F, cluster_rows = F, cellwidth = 10, cellheight = 15)
 dev.off()
@@ -98,8 +100,6 @@ names(age_range)<-dat
 
 cor_age<-function(organism, diagnosis, region){
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism==organism & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
-dat<-setdiff(dat, c("GSE30272"))#no raw
-dat<-setdiff(dat, c("GSE102741"))#batch PC1>40% of variance
 
 #compare aging datasets
 data<-get(dat[1])
@@ -119,10 +119,10 @@ for(dd in dat){
   sample<-metadata$Sample[which(metadata$Dataset==dd &metadata$Organism==organism & metadata$Diagnosis==diagnosis & metadata$Region_simpl%in% region)]
   data<-data[, sample]
   age<-round(as.numeric(metadata$Age[which(metadata$Dataset==dd &metadata$Organism==organism & metadata$Diagnosis==diagnosis & metadata$Region_simpl%in% region)]))
-  if(length(which(age>6570))>=10){
-    sample<-sample[which(age>6570)]
+  if(length(which(age>=7300))>=10){
+    sample<-sample[which(age>=7300)]
     data<-data[, sample]
-    age<-age[which(age>6570)]
+    age<-age[which(age>=7300)]
     cor_age[genes,dd]<-cor(t(data[genes,]), age, method="p", use="pairwise.complete.obs")
   }
 }
@@ -149,11 +149,11 @@ cor_age_tot[rownames(cor_mPFC), colnames(cor_mPFC)]<-cor_mPFC
 hist(rowSums(cor_age_tot>0, na.rm=T))
 hist(rowSums(cor_age_tot<0, na.rm=T))
 
-age_up<-rownames(cor_age_tot)[rowSums(cor_age_tot>0, na.rm=T)>=12]
-age_dn<-rownames(cor_age_tot)[rowSums(cor_age_tot<0, na.rm=T)>=12]
+age_up<-rownames(cor_age_tot)[rowSums(cor_age_tot>0, na.rm=T)>=16]
+age_dn<-rownames(cor_age_tot)[rowSums(cor_age_tot<0, na.rm=T)>=16]
 
-write.csv(age_up, file="age_up.csv")
-write.csv(age_dn, file="age_dn.csv")
+write.csv(age_up, file="Results/age_up.csv")
+write.csv(age_dn, file="Results/age_dn.csv")
 
 toplot<-cor_age_tot[age_up,]
 paletteLength <- 50
@@ -189,6 +189,7 @@ length(myBreaks) == length(paletteLength) + 1
 p<-pheatmap(cor_datasets, cellwidth=15, cellheight=15, breaks=myBreaks,
             color = myColor)
 
+dev.off()
 pdf("Results/Figures/Aging_similarity.pdf",8,8)
 print(p)
 dev.off()

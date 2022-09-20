@@ -115,5 +115,11 @@ metadata_GSE33000<-data.frame(Sample=colnames(GSE33000),
 
 metadata<-rbind.data.frame(metadata, metadata_GSE33000)
 
+metadata$Gender[metadata$Gender=="female"]<-"F"
+metadata$Gender[metadata$Gender=="male"]<-"M"
+metadata$Diagnosis[metadata$Diagnosis=="Alzheimer's disease"]<-"AD"
+metadata$Diagnosis[metadata$Diagnosis=="Huntington's disease"]<-"HD"
+metadata$Diagnosis[metadata$Diagnosis=="non-demented"]<-"Healthy"
+
 save.image("Results/RData/Alldata_20Sep.RData")
 
