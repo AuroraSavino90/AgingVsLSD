@@ -21,16 +21,12 @@ save.image("~/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/
 
 #################
 rm(list=ls())
-load("~/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVSLSD/RData/Alldata_27May.RData")
+load("~/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVSLSD_local/RData/Alldata_27May.RData")
 
-load("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Aging/GTEx_RPM_PFC_filt2.RData")
-E_PFC<-E
-E_PFC<-E_PFC[rowSums(E_PFC>0)>=10,]
-metadata<-metadata[-which(metadata$Sample %in% setdiff(metadata$Sample[metadata$Dataset=="E_PFC"], colnames(E_PFC))),]
+load("Results/RData/GTEx_RPM_PFC_filt.RData")
+metadata<-metadata[-which(metadata$Sample %in% setdiff(metadata$Sample[metadata$Dataset=="E_PFC"], colnames(GTEx_PFC))),]
 
 metadata$Dataset[metadata$Dataset=="E_PFC"]<-"GTEx_PFC"
-GTEx_PFC<-E_PFC
-rm(E)
 rm(E_PFC)
 
 
@@ -45,12 +41,12 @@ metadata$Gender[which(metadata$Gender=="male")]<-"M"
 
 
 
-#numero di campioni con età superiore a 18
+#numero di campioni con età superiore a 20
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens"]))
 adult_num<-c()
 for(dd in dat){
   age<-round(as.numeric(metadata$Age[which(metadata$Dataset==dd & metadata$Organism=="Homo sapiens")]))
-  adult_num<-c(adult_num, length(which(age>6570)))
+  adult_num<-c(adult_num, length(which(age>=7300)))
 }
 
 dataset_adult<-dat[which(adult_num>=10)]
@@ -61,7 +57,63 @@ metadata$Smoke[metadata$Smoke %in% c("N")]<-"No"
 metadata$Smoke[metadata$Smoke %in% c("Y")]<-"Yes"
 metadata$Smoke[metadata$Smoke %in% c("U")]<-NA
 
-metadata<-metadata[metadata$Dataset!="GSE30272",] #no raw data
+##include GSE33000
+################################
+##########GSE33000 
+###############################
+changenames<-function(data, anno){
+  annotation_sel=anno[match( rownames(data), anno[,1]),2]
+  
+  if(length(which(annotation_sel==""))>0){
+    data<-data[-which(annotation_sel==""),]
+    annotation_sel<-annotation_sel[-which(annotation_sel=="")]
+  }
+  
+  a<-which(duplicated(annotation_sel))
+  while(length(a)>0){
+    for(i in 1:length(unique(annotation_sel))){
+      if(length(which(annotation_sel==unique(annotation_sel)[i]))>1){
+        m=which.max(rowMeans(data[which(annotation_sel==unique(annotation_sel)[i]),], na.rm=T))
+        data=data[-which(annotation_sel==unique(annotation_sel)[i])[-m],]
+        annotation_sel=annotation_sel[-which(annotation_sel==unique(annotation_sel)[i])[-m]]
+      }
+    }
+    
+    data=data[which(is.na(annotation_sel)==F),]
+    annotation_sel=na.omit(annotation_sel)
+    a<-which(duplicated(annotation_sel))
+  }
+  
+  rownames(data)=annotation_sel
+  return(data)
+}
 
-save.image("~/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVSLSD/RData/Alldata_7Jul.RData")
+library(GEOquery)
+gds<-getGEO("GSE33000",destdir="Data/", AnnotGPL = TRUE)
+
+GSE33000<-exprs(gds$GSE33000_series_matrix.txt.gz)
+GSE33000_meta<-pData(gds$GSE33000_series_matrix.txt.gz)
+GSE33000_anno<-fData(gds$GSE33000_series_matrix.txt.gz)
+
+GSE33000<-changenames(data=GSE33000, anno=cbind(as.character(GSE33000_anno$ID), GSE33000_anno$`Gene symbol`))
+
+metadata_GSE33000<-data.frame(Sample=colnames(GSE33000),
+                              Dataset="GSE33000",
+                              Age=as.numeric(gsub(" yrs", "", GSE33000_meta$`age:ch2`))*356,
+                              Gender=GSE33000_meta$`gender:ch2`,
+                              Race=NA,
+                              Suicide=NA,
+                              Diagnosis=GSE33000_meta$`disease status:ch2`,
+                              Alcohol=NA,
+                              Drugs=NA,
+                              Smoke=NA,
+                              Medication=NA,
+                              Organism="Homo sapiens", 
+                              Region=GSE33000_meta$`tissue:ch1`,
+                              Platform=GSE33000_meta$platform_id,
+                              Region_simpl="PFC")
+
+metadata<-rbind.data.frame(metadata, metadata_GSE33000)
+
+save.image("Results/RData/Alldata_20Sep.RData")
 
