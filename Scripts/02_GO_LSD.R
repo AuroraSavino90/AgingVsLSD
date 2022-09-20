@@ -8,24 +8,6 @@ homologs<-read.csv("Data/Human rat homologs.txt")
 ####################
 ### GO categories
 ###################
-forgesea<-sort(forgesea, decreasing=T)
-gsea_GO<-gseGO(forgesea,
-               ont = "BP",
-               "org.Hs.eg.db",
-               keyType = "SYMBOL",
-               exponent = 1,
-               minGSSize = 10,
-               maxGSSize = 500,
-               eps = 1e-10,
-               pvalueCutoff = 1,
-               pAdjustMethod = "BH",
-               verbose = TRUE,
-               seed = FALSE,
-               by = "fgsea"
-)
-
-
-
 ##########
 ## GO for LSD
 #########
