@@ -6,27 +6,28 @@ load("Results/RData/alldata_resid.RData")
 load("Results/RData/age_all.RData")
 
 load("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Psychedelics metanalysis/Psychedelics_PFC.RData")
-load("RData/Alldata_7Jul.RData")
+load("Results/RData/Alldata_20Sep.RData")
 rat_homologs<-read.csv("Data/Human rat homologs.txt")
 mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 
-mouse_data<-c("DE_GSE64607","DE_GSE38465_SAMP8","DE_GSE38465_SAMR1","DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626","DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",
-              "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks", "DE_GSE30880")
+mouse_data<-c("DE_GSE64607","DE_GSE164798_chronic", "DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626",
+              "DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",
+              "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks",
+              "DE_GSE105453_Y", "DE_GSE105453_O", "DE_GSE111273_Y", "DE_GSE111273_O")
 rat_data<-c("DE_GSE14720", "DE_GSE23728","DE_GSE179380","DE_DMT", "DE_pharm", "DE_harm")
 ##MDMA
 DEGs_array<-c("DE_MDMA",
-              
               "DE_GSE26364",
               #DOI
-              
               "DE_GSE23728",
               #LSD
               "DE_GSE179380", 
-              "DE_GSE64607","DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57",
-              "DE_GSE30880")
+              "DE_GSE64607","DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57"
+              
+)
 
 DEGs_seq<-c("DE_DMT", "DE_GSE161626","DE_GSE161626_48h","DE_GSE161626_7d", "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks",
-            "DE_GSE81672", "DE_harm", "DE_pharm")
+            "DE_GSE81672", "DE_harm", "DE_pharm", "DE_GSE164798_chronic", "DE_GSE111273_Y", "DE_GSE111273_O")
 
 library(fgsea)
 library(ggplot2)
@@ -122,7 +123,7 @@ for(DE in DEGs_seq){
 }
 
 i<-i+1
-load("RData/DE_GSE179379.RData")
+load("Results/RData/DE_GSE179379.RData")
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]
@@ -152,17 +153,17 @@ NES_dn<-c(NES_dn, fgsea_tot[[i]]$NES[1])
 }
 
 library(ggrepel)
-dataset<-c(DEGs_array, DEGs_seq)
 dataset<-c("MDMA", "Ketamine (long term)", "DOI (2h)", 
            "LSD (single)", "Exercise", "Alcohol", "Alcohol", "Alcohol",
-           "Enriched Environment", "DMT", "DOI (24h)", "DOI (48h)", "DOI (7days)",
+           "DMT", "DOI (24h)", "DOI (48h)", "DOI (7days)",
            "Psilocybin (3h)", "Psilocybin (4weeks)", "Ketamine (single)",
-           "Harmaline", "Pharmahuasca", "LSD (chronic)")
+           "Harmaline", "Pharmahuasca", "Exercise","EE (Young)", "EE (Old)", 
+           "LSD (chronic)")
 type<-rep("Psychoplastogen", length(dataset))
-type[c(5,9)]<-"Positive Control"
+type[c(5, 18:20)]<-"Positive Control"
 type[c(6,7,8)]<-"Negative Control"
 
-df<-data.frame(NES_up=NES_up, NES_dn=NES_dn, dataset=dataset, direction="increase aging",
+df<-data.frame(NES_up=NES_up, NES_dn=NES_dn, dataset=dataset,
                type=type)
 
 pdf("Results/Figures/All_psychedelics_integratedAndCTRL.pdf",6.5,5.5)

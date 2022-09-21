@@ -11,7 +11,8 @@ mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 
 mouse_data<-c("DE_GSE64607","DE_GSE164798_chronic", "DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626",
               "DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",
-              "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks")
+              "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks",
+               "DE_GSE111273_Y", "DE_GSE111273_O")
 rat_data<-c("DE_GSE14720", "DE_GSE23728","DE_GSE179380","DE_DMT", "DE_pharm", "DE_harm")
 ##MDMA
 DEGs_array<-c("DE_MDMA",
@@ -21,12 +22,11 @@ DEGs_array<-c("DE_MDMA",
               #LSD
               "DE_GSE179380", 
               "DE_GSE64607","DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57"
-               
-              )
+              
+)
 
 DEGs_seq<-c("DE_DMT", "DE_GSE161626","DE_GSE161626_48h","DE_GSE161626_7d", "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks",
-"DE_GSE81672", "DE_harm", "DE_pharm", "DE_GSE164798_chronic")
-
+            "DE_GSE81672", "DE_harm", "DE_pharm", "DE_GSE164798_chronic",  "DE_GSE111273_Y", "DE_GSE111273_O")
 library(metap)
 
 meta_dn_rev<-function(x){
@@ -233,7 +233,7 @@ for(DE in DEGs_seq){
   genes_cor<-list()
   n<-0
   for(dd in dat){
-    n<-n+1
+     n<-n+1
     data<-get(dd)
     sample<-metadata$Sample[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
     data<-data[, sample]
@@ -251,6 +251,7 @@ for(DE in DEGs_seq){
   
   region<-"PFC"
   diagnosis<-"Healthy"
+  dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
   dat<-setdiff(dat, c("GSE102741", "GSE5388"))#batch PC1>40% of variance
   
   for(dd in dat){
@@ -359,12 +360,13 @@ dataset<-c("MDMA", "Ketamine (long term)", "DOI (2h)",
            "LSD (single)", "Exercise", "Alcohol", "Alcohol", "Alcohol",
            "DMT", "DOI (24h)", "DOI (48h)", "DOI (7days)",
            "Psilocybin (3h)", "Psilocybin (4weeks)", "Ketamine (single)",
-           "Harmaline", "Pharmahuasca", "LSD (chronic)","Exercise")
+           "Harmaline", "Pharmahuasca", "Exercise","EE (Young)", "EE (Old)", 
+           "LSD (chronic)")
 type<-rep("Psychoplastogen", length(dataset))
-type[c(5,19)]<-"Positive Control"
+type[c(5, 18:20)]<-"Positive Control"
 type[c(6,7,8)]<-"Negative Control"
 
-df<-data.frame(pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=dataset, direction="increase aging",
+df<-data.frame(pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=dataset,
                type=type)
 
 pdf("Results/Figures/All_psychedelicsAndCTRL.pdf",6.5,5.5)
