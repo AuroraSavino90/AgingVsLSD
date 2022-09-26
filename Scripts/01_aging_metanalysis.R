@@ -195,100 +195,66 @@ print(p)
 dev.off()
 
 
+#########
+#Average correlation with age
+########
 
-cor_DLPFC<-cor_age(organism="Homo sapiens", region="DLPFC", diagnosis="Healthy")
-cor_mPFC<-cor_age(organism="Homo sapiens", region="PFC", diagnosis="Healthy")
-cor_TC<-cor_age(organism="Homo sapiens", region="TC", diagnosis="Healthy")
-cor_OPFC<-cor_age(organism="Homo sapiens", region="OPFC", diagnosis="Healthy")
+region<-c("DLPFC")
+diagnosis<-"Healthy"
+dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
+dat<-setdiff(dat, c("GSE5388"))#outlier
 
-colnames(cor_DLPFC)<-paste(colnames(cor_DLPFC), "DLPFC")
-colnames(cor_mPFC)<-paste(colnames(cor_mPFC), "mPFC")
-colnames(cor_OPFC)<-paste(colnames(cor_OPFC), "OPFC")
+dat_names<-c()
+genes_cor<-list()
+n<-0
+for(dd in dat){
+  n<-n+1
+  data<-get(dd)
+  sample<-metadata$Sample[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
+  data<-data[, sample]
+  age<-metadata$Age[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
+  age<-as.numeric(age)
+  if(length(which(age>7300))>=10){
+    sample<-sample[which(age>7300)]
+    data<-data[, sample]
+    age<-age[which(age>7300)]
+    
+    genes_cor[[n]]<-cor(t(data), as.numeric(age))
+    dat_names<-c(dat_names, dd)
+  }
+}
 
-allgenes<-unique(c(rownames(cor_DLPFC), rownames(cor_mPFC), names(cor_TC), rownames(cor_OPFC), names(cor_SFG)))
-nsets<-ncol(cor_DLPFC)+ncol(cor_mPFC)+1+ncol(cor_OPFC)
-cor_age_tot<-matrix(nrow=length(allgenes), ncol=nsets)
-colnames(cor_age_tot)<-c(colnames(cor_DLPFC), colnames(cor_mPFC), "TC", colnames(cor_OPFC))
-rownames(cor_age_tot)<-allgenes
+region<-"PFC"
+diagnosis<-"Healthy"
+dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
+dat<-setdiff(dat, c("GSE5388"))#outlier
 
-cor_age_tot[rownames(cor_DLPFC), colnames(cor_DLPFC)]<-cor_DLPFC
-cor_age_tot[rownames(cor_mPFC), colnames(cor_mPFC)]<-cor_mPFC
-cor_age_tot[names(cor_TC), "TC"]<-cor_TC
-cor_age_tot[rownames(cor_OPFC), colnames(cor_OPFC)]<-cor_OPFC
+for(dd in dat){
+  n<-n+1
+  data<-get(dd)
+  sample<-metadata$Sample[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
+  data<-data[, sample]
+  age<-metadata$Age[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
+  age<-as.numeric(age)
+  if(length(which(age>=7300))>=10){
+    sample<-sample[which(age>=7300)]
+    data<-data[, sample]
+    age<-age[which(age>=7300)]
+    
+    genes_cor[[n]]<-cor(t(data), as.numeric(age))
+    dat_names<-c(dat_names, dd)
+  }
+}
+genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
+lapply(genes_cor, function(x){mean(x,na.rm=T)})
 
+df<-data.frame(cor=genes_cor[[1]][,1], dataset=dat_names[1])
+for(dat in 2:length(genes_cor)){
+  df_tmp<-data.frame(cor=genes_cor[[dat]][,1], dataset=dat_names[dat])
+  df<-rbind.data.frame(df, df_tmp)
+}
 
-
-cor_datasets<-cor(cor_age_tot, method="s", use="pairwise.complete.obs")
-hist(cor_datasets[upper.tri(cor_datasets)], breaks=20)
-
-
-paletteLength <- 50
-# use floor and ceiling to deal with even/odd length pallettelengths
-myColor <- colorRampPalette(c("#4575B4", "white", "#D73027"))(paletteLength)
-# length(breaks) == length(paletteLength) + 1
-# use floor and ceiling to deal with even/odd length pallettelengths
-myBreaks <- c(seq(min(unlist(cor_datasets), na.rm=T), 0, length.out=ceiling(paletteLength/2) + 1),
-              seq(max(unlist(cor_datasets), na.rm=T)/paletteLength, max(unlist(cor_datasets), na.rm=T), length.out=floor(paletteLength/2)))
-length(myBreaks) == length(paletteLength) + 1
-
-pheatmap(cor_datasets, cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor)
-
-#########################
-##### Disease
-#######################
-
-cor_DLPFC_s<-cor_age(organism="Homo sapiens", region="DLPFC", diagnosis="Schizophrenia")
-cor_mPFC_s<-cor_age(organism="Homo sapiens", region="PFC", diagnosis="Schizophrenia")
-cor_DLPFC_m<-cor_age(organism="Homo sapiens", region="DLPFC", diagnosis="MDD")
-cor_DLPFC_b<-cor_age(organism="Homo sapiens", region="DLPFC", diagnosis="Bipolar")
-
-colnames(cor_DLPFC_m)<-paste(colnames(cor_DLPFC_m), "m")
-colnames(cor_DLPFC_b)<-paste(colnames(cor_DLPFC_b), "b")
-
-allgenes<-unique(c(rownames(cor_DLPFC_b), rownames(cor_DLPFC_m), names(cor_DLPFC_s), names(cor_mPFC_s)))
-nsets<-ncol(cor_DLPFC_b)+ncol(cor_DLPFC_m)+2
-cor_age_tot_dis<-matrix(nrow=length(allgenes), ncol=nsets)
-colnames(cor_age_tot_dis)<-c(colnames(cor_DLPFC_b), colnames(cor_DLPFC_m), "DLPFC_s", "mPFC_s")
-rownames(cor_age_tot_dis)<-allgenes
-
-cor_age_tot_dis[rownames(cor_DLPFC_b), colnames(cor_DLPFC_b)]<-cor_DLPFC_b
-cor_age_tot_dis[rownames(cor_DLPFC_m), colnames(cor_DLPFC_m)]<-cor_DLPFC_m
-cor_age_tot_dis[names(cor_DLPFC_s), "DLPFC_s"]<-cor_DLPFC_s
-cor_age_tot_dis[names(cor_mPFC_s), "mPFC_s"]<-cor_mPFC_s
-
-
-cor_datasets<-cor(cor_age_tot_dis, method="s", use="pairwise.complete.obs")
-hist(cor_datasets[upper.tri(cor_datasets)], breaks=20)
-
-
-paletteLength <- 50
-# use floor and ceiling to deal with even/odd length pallettelengths
-myColor <- colorRampPalette(c("#4575B4", "white", "#D73027"))(paletteLength)
-# length(breaks) == length(paletteLength) + 1
-# use floor and ceiling to deal with even/odd length pallettelengths
-myBreaks <- c(seq(min(unlist(cor_datasets), na.rm=T), 0, length.out=ceiling(paletteLength/2) + 1),
-              seq(max(unlist(cor_datasets), na.rm=T)/paletteLength, max(unlist(cor_datasets), na.rm=T), length.out=floor(paletteLength/2)))
-length(myBreaks) == length(paletteLength) + 1
-
-pheatmap(cor_datasets, cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, clustering_distance_rows = "correlation",  clustering_distance_cols = "correlation")
-
-incommon<-intersect(rownames(cor_age_tot), rownames(cor_age_tot_dis))
-cor_age_tot_tot<-cbind(cor_age_tot[incommon, 1:13], cor_age_tot_dis[incommon,-8])
-
-
-cor_datasets<-cor(cor_age_tot_tot, method="s", use="pairwise.complete.obs")
-
-
-paletteLength <- 50
-# use floor and ceiling to deal with even/odd length pallettelengths
-myColor <- colorRampPalette(c("#4575B4", "white", "#D73027"))(paletteLength)
-# length(breaks) == length(paletteLength) + 1
-# use floor and ceiling to deal with even/odd length pallettelengths
-myBreaks <- c(seq(min(unlist(cor_datasets), na.rm=T), 0, length.out=ceiling(paletteLength/2) + 1),
-              seq(max(unlist(cor_datasets), na.rm=T)/paletteLength, max(unlist(cor_datasets), na.rm=T), length.out=floor(paletteLength/2)))
-length(myBreaks) == length(paletteLength) + 1
-
-pheatmap(cor_datasets, cellwidth=10, cellheight=10, breaks=myBreaks, color = myColor,
-         clustering_distance_rows = "correlation",  clustering_distance_cols = "correlation")
-
-pheatmap(cor_datasets, cellwidth=10, cellheight=10, breaks=myBreaks, color = myColor)
+pdf("Results/Figures/median_corr.pdf", 8,5)
+ggplot(df, aes(x=dataset, y=cor))+geom_violin(trim=F)+ stat_summary(fun.y=median, geom="point", size=2, color="red")+
+  theme_classic()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+dev.off()
