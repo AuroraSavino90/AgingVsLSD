@@ -98,9 +98,11 @@ for(dd in dat){
 names(age_range)<-dat
 
 
-cor_age<-function(organism, diagnosis, region){
+cor_age<-function(organism, diagnosis, region, filter=F){
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism==organism & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
-
+if(filter==T){
+  dat<-setdiff(dat, c("GSE102741", "GSE5388"))
+}
 #compare aging datasets
 data<-get(dat[1])
 unione<-rownames(data)
@@ -152,8 +154,8 @@ hist(rowSums(cor_age_tot<0, na.rm=T))
 age_up<-rownames(cor_age_tot)[rowSums(cor_age_tot>0, na.rm=T)>=16]
 age_dn<-rownames(cor_age_tot)[rowSums(cor_age_tot<0, na.rm=T)>=16]
 
-write.csv(age_up, file="Results/age_up.csv")
-write.csv(age_dn, file="Results/age_dn.csv")
+write.csv(age_up, file="Results/age_up_all.csv")
+write.csv(age_dn, file="Results/age_dn_all.csv")
 
 toplot<-cor_age_tot[age_up,]
 paletteLength <- 50
@@ -258,3 +260,32 @@ pdf("Results/Figures/median_corr.pdf", 8,5)
 ggplot(df, aes(x=dataset, y=cor))+geom_violin(trim=F)+ stat_summary(fun.y=median, geom="point", size=2, color="red")+
   theme_classic()+ theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 dev.off()
+
+###################
+### Aging signature with only the selected datasets
+#####################
+
+cor_DLPFC<-cor_age(organism="Homo sapiens", region="DLPFC", diagnosis="Healthy", filter = T)
+cor_mPFC<-cor_age(organism="Homo sapiens", region="PFC", diagnosis="Healthy", filter = T)
+
+colnames(cor_DLPFC)<-paste(colnames(cor_DLPFC), "DLPFC")
+colnames(cor_mPFC)<-paste(colnames(cor_mPFC), "mPFC")
+
+allgenes<-unique(c(rownames(cor_DLPFC), rownames(cor_mPFC)))
+nsets<-ncol(cor_DLPFC)+ncol(cor_mPFC)
+cor_age_tot<-matrix(nrow=length(allgenes), ncol=nsets)
+colnames(cor_age_tot)<-c(colnames(cor_DLPFC), colnames(cor_mPFC))
+rownames(cor_age_tot)<-allgenes
+
+cor_age_tot[rownames(cor_DLPFC), colnames(cor_DLPFC)]<-cor_DLPFC
+cor_age_tot[rownames(cor_mPFC), colnames(cor_mPFC)]<-cor_mPFC
+
+hist(rowSums(cor_age_tot>0, na.rm=T))
+hist(rowSums(cor_age_tot<0, na.rm=T))
+
+age_up<-rownames(cor_age_tot)[rowSums(cor_age_tot>0, na.rm=T)>=14]
+age_dn<-rownames(cor_age_tot)[rowSums(cor_age_tot<0, na.rm=T)>=14]
+
+write.csv(age_up, file="Results/age_up.csv")
+write.csv(age_dn, file="Results/age_dn.csv")
+
