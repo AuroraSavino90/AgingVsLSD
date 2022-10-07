@@ -1,3 +1,4 @@
+rm(list=ls())
 load("Results/RData/Alldata_20Sep.RData")
 load("Results/RData/DE_GSE179379.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
@@ -193,7 +194,7 @@ pdf("Results/Figures/REACTOMEpath.pdf",15,20)
 pheatmap(toplot, cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T,  cluster_rows = F)
 dev.off()
 
-toplot_sel<-toplot[names(pup[order(unlist(pup))[1:20]]),]
+toplot_sel<-toplot[names(pup[order(unlist(pup))[1:10]]),]
 
 paletteLength <- 50
 myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
@@ -205,15 +206,4 @@ pheatmap(toplot_sel, cellwidth=15, cellheight=15, breaks=myBreaks, color = myCol
 dev.off()
 pheatmap(-log10(allp_mat[grep("E4F1", rownames(allp_mat)),])*sign(allNES_mat[grep("E4F1", rownames(allp_mat)),]), breaks=myBreaks, color = myColor)
 
-
-toplot_sel<-toplot[names(pdn[order(unlist(pdn))[1:20]]),]
-
-paletteLength <- 50
-myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
-myBreaks <- c(seq(min(unlist(toplot_sel), na.rm=T), 0, length.out=ceiling(paletteLength/2) + 1),
-              seq(max(unlist(toplot_sel), na.rm=T)/paletteLength, max(unlist(toplot_sel), na.rm=T), length.out=floor(paletteLength/2)))
-
-pdf("Results/Figures/REACTOMEdn_top.pdf",15,8)
-pheatmap(toplot_sel, cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T,  cluster_rows = F)
-dev.off()
 
