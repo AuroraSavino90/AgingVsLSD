@@ -1,3 +1,4 @@
+rm(list=ls())
 load("Results/RData/Alldata_20Sep.RData")
 load("Results/RData/DE_GSE179379.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
@@ -65,13 +66,13 @@ genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
 ###########################
 library(msigdbr)
 library(clusterProfiler)
-m_df <- msigdbr(species = "Homo sapiens", category = "C2", subcategory = "CP") %>% 
+m_df <- msigdbr(species = "Homo sapiens", category = "C3", subcategory = "TFT:TFT_Legacy" ) %>% 
   dplyr::select(gs_name, gene_symbol)
 
 rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
 
 genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
-fgsea_MsigdbC2CP<-list()
+fgsea_MsigdbC3<-list()
 p<-list()
 df<-list()
 for(n in 1:length(genes_cor)){
@@ -79,21 +80,21 @@ for(n in 1:length(genes_cor)){
   names(forgesea)<-rownames(genes_cor[[n]])
   forgesea<-forgesea[!is.na(forgesea)]
   forgesea<-forgesea[names(forgesea) %in% rat_homologs]
-  fgsea_MsigdbC2CP[[n]]<-GSEA(sort(forgesea, decreasing=T), TERM2GENE=m_df, pvalueCutoff = 1, maxGSSize = 10000)
+  fgsea_MsigdbC3[[n]]<-GSEA(sort(forgesea, decreasing=T), TERM2GENE=m_df, pvalueCutoff = 1, maxGSSize = 10000)
   
 }
 
-save(fgsea_MsigdbC2CP, file="Results/RData/fgsea_MsigdbC2CP.RData")
+save(fgsea_MsigdbC3, file="Results/RData/fgsea_MsigdbC3TFT.RData")
 
-load("Results/RData/fgsea_MsigdbC2CP.RData")
+load("Results/RData/fgsea_MsigdbC3TFT.RData")
 m_df<-data.frame(m_df)
-allp<-matrix(NA, nrow=length(unique(m_df[,1])), ncol=length(fgsea_MsigdbC2CP))
+allp<-matrix(NA, nrow=length(unique(m_df[,1])), ncol=length(fgsea_MsigdbC3))
 rownames(allp)<-unique(m_df[,1])
-allNES<-matrix(NA, nrow=length(unique(m_df[,1])), ncol=length(fgsea_MsigdbC2CP))
+allNES<-matrix(NA, nrow=length(unique(m_df[,1])), ncol=length(fgsea_MsigdbC3))
 rownames(allNES)<-unique(m_df[,1])
-for(i in 1:length(fgsea_MsigdbC2CP)){
-  allp[fgsea_MsigdbC2CP[[i]]$ID,i]<-fgsea_MsigdbC2CP[[i]]$p.adjust
-  allNES[fgsea_MsigdbC2CP[[i]]$ID,i]<-fgsea_MsigdbC2CP[[i]]$NES
+for(i in 1:length(fgsea_MsigdbC3)){
+  allp[fgsea_MsigdbC3[[i]]$ID,i]<-fgsea_MsigdbC3[[i]]$p.adjust
+  allNES[fgsea_MsigdbC3[[i]]$ID,i]<-fgsea_MsigdbC3[[i]]$NES
 }
 allNES[allp>0.05]<-NA
 hist(rowSums(allNES>0, na.rm=T))
@@ -126,20 +127,20 @@ TF_up<- enricher(gene = DEG_up_conv,
 
 library(metap)
 allpaths<-c()
-for(i in 1:length(fgsea_MsigdbC2CP)){
-  allpaths<-union(allpaths, fgsea_MsigdbC2CP[[i]]$ID)
+for(i in 1:length(fgsea_MsigdbC3)){
+  allpaths<-union(allpaths, fgsea_MsigdbC3[[i]]$ID)
 }
 
-allp_mat<-matrix(0,nrow=length(allpaths), ncol=length(fgsea_MsigdbC2CP))
+allp_mat<-matrix(NA,nrow=length(allpaths), ncol=length(fgsea_MsigdbC3))
 rownames(allp_mat)<-allpaths
-for(i in 1:length(fgsea_MsigdbC2CP)){
-  allp_mat[fgsea_MsigdbC2CP[[i]]$ID,i]<-fgsea_MsigdbC2CP[[i]]$pvalue
+for(i in 1:length(fgsea_MsigdbC3)){
+  allp_mat[fgsea_MsigdbC3[[i]]$ID,i]<-fgsea_MsigdbC3[[i]]$pvalue
 }
 
-allNES_mat<-matrix(0,nrow=length(allpaths), ncol=length(fgsea_MsigdbC2CP))
+allNES_mat<-matrix(0,nrow=length(allpaths), ncol=length(fgsea_MsigdbC3))
 rownames(allNES_mat)<-allpaths
-for(i in 1:length(fgsea_MsigdbC2CP)){
-  allNES_mat[fgsea_MsigdbC2CP[[i]]$ID,i]<-fgsea_MsigdbC2CP[[i]]$NES
+for(i in 1:length(fgsea_MsigdbC3)){
+  allNES_mat[fgsea_MsigdbC3[[i]]$ID,i]<-fgsea_MsigdbC3[[i]]$NES
 }
 
 DE_GO_LSD<-union(TF_up$ID, TF_down$ID)
@@ -203,5 +204,67 @@ myBreaks <- c(seq(min(unlist(toplot_sel), na.rm=T), 0, length.out=ceiling(palett
 pdf("Results/Figures/TFup_top.pdf",8,8)
 pheatmap(toplot_sel, cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T,  cluster_rows = F)
 dev.off()
-pheatmap(-log10(allp_mat[grep("E4F1", rownames(allp_mat)),])*sign(allNES_mat[grep("E4F1", rownames(allp_mat)),]), breaks=myBreaks, color = myColor)
+pheatmap(-log10(allp_mat[grep("CREB", rownames(allp_mat)),])*sign(allNES_mat[grep("CREB", rownames(allp_mat)),]), breaks=myBreaks, color = myColor)
+
+
+
+genes<-c("NFIL3", NA, NA, "E4F1", "HLF", NA, "ONECUT1", "NFIL3", "ATF2", 
+         "YY1", "SLC22A1", NA, "FOXJ2", "CREB1", "STAT5A", NA, NA, "CEBPG", "CREB1", "YY1")
+
+genes_mat<-matrix(0,nrow=length(genes), ncol=length(genes_cor))
+rownames(genes_mat)<-genes
+for(i in 1:length(genes_cor)){
+  for(j in 1:nrow(genes_mat)){
+    if(length(which(rownames(genes_cor[[i]]) %in% genes[j]))>0){
+    genes_mat[j,i]<-genes_cor[[i]][which(rownames(genes_cor[[i]]) %in% genes[j]),]
+    }
+  }
+}
+
+DE_GSE179379_up<-DE_GSE179379
+homologs_GSE179379<-homologs[match(rownames(DE_GSE179379_up), homologs[,2]),3]
+DE_GSE179379_up<-DE_GSE179379_up[!is.na(homologs_GSE179379),]
+rownames(DE_GSE179379_up)<-na.omit(homologs_GSE179379)
+anno2<-data.frame(LSDdir=as.factor(sign(DE_GSE179379_up[genes, "log2FoldChange"])), LSDp=-log10(DE_GSE179379_up[genes, "pvalue"]))
+
+sets<-names(pup[order(unlist(pup))[1:20]])
+anno<-data.frame(AgingSetp= -log10(unlist(pup[order(unlist(pup))[1:20]])),
+                 LSDsetp=c(-log10(TF_up$pvalue)[match(sets, TF_up$ID)]),
+                 LSDTFdir=anno2$LSDdir,
+                 LSDTFp=anno2$LSDp,
+                 TFAge=rowSums(genes_mat<0))
+rownames(anno)<-sets
+anno$TFAge[is.na(genes)]<-NA
+
+cols <- colorRampPalette(c("white", "darkgreen"))
+cols2 <- colorRampPalette(c("purple", "forestgreen"))
+annotation_colors = list(
+  AgingSetp= cols(20),
+  LSDsetp = cols(20),
+  LSDTFdir=c("-1" = "purple", "1" = "forestgreen"),
+  LSDTFp= cols(20),
+  TFAge = cols2(20))
+
+
+pdf("Results/Figures/TFup_top_anno.pdf",8,8)
+pheatmap(toplot_sel, cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T,  cluster_rows = F, annotation_row = anno, annotation_colors = annotation_colors)
+dev.off()
+
+load("Results/RData/pup_dementia_TF.RData")
+load("Results/RData/allp_dementia_TF.RData")
+colnames(allp_mat_sel_dementia)<-c("AD", "AD", "AD", "AD", "AD", "HD","PDD","DLB")
+
+anno<-data.frame(DemSetp= -log10(unlist(pup_dementia[rownames(toplot_sel)])))
+rownames(anno)<-sets
+annotation_colors = list(DemSetp= cols(20))
+
+
+paletteLength <- 50
+myColor <- colorRampPalette(c("blue", "white"))(paletteLength)
+myBreaks <- c(seq(min(unlist(log10(allp_mat_sel_dementia[rownames(toplot_sel),])), na.rm=T), 0, length.out=ceiling(paletteLength) ))
+
+pdf("Results/Figures/TFup_top_anno_dementia.pdf",8,8)
+pheatmap(log10(allp_mat_sel_dementia[rownames(toplot_sel),]), cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T,  cluster_rows = F, cluster_cols = F,
+         annotation_row = anno, annotation_colors = annotation_colors)
+dev.off()
 
