@@ -20,8 +20,7 @@ library(ggplot2)
 region<-c("DLPFC")
 diagnosis<-"Healthy"
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
-dat<-setdiff(dat, c("GSE30272"))#no raw
-dat<-setdiff(dat, c("GSE102741"))#batch PC1>40% of variance
+dat<-setdiff(dat, c("GSE102741", "GSE5388"))
 dat_names<-c()
 genes_cor<-list()
 n<-0
@@ -45,7 +44,7 @@ for(dd in dat){
 region<-"PFC"
 diagnosis<-"Healthy"
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
-dat<-setdiff(dat, c("GSE102741"))#batch PC1>40% of variance
+dat<-setdiff(dat, c("GSE102741", "GSE5388"))
 
 for(dd in dat){
   n<-n+1
@@ -85,7 +84,6 @@ df_signature<-df[[1]]
 for(n in 2:length(genes_cor)){
   df_signature<-rbind.data.frame(df_signature, df[[n]])
 }
-df_signature<-df_signature[df_signature$dataset!="GSE5388",]
 
 pdf("Results/Figures/GSEA_siganture.pdf",8,8)
 ggplot(df_signature, aes(scaled, y, colour=path))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
@@ -94,8 +92,8 @@ dev.off()
 
 
 
-age_up<-read.csv("age_up.csv")
-age_dn<-read.csv("age_dn.csv")
+age_up<-read.csv("Results/age_up.csv")
+age_dn<-read.csv("Results/age_dn.csv")
 
 intersect(signature_up, age_up[,2])
 intersect(signature_dn, age_dn[,2])
