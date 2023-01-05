@@ -720,7 +720,7 @@ for(up in TF_up$ID[which(TF_up$ID %in% rownames(allNES_mat_sel))]){
   ind<-ind+1
   allNES_mat_sel[up, ]
   
-  istwo <- rep(T, 14)
+  istwo <- rep(T, 15)
   toinvert <- ifelse(sign(allNES_mat_sel[up, ])==(1), T, F)
   missing<-which(is.na(toinvert))
   if(length(missing)==0){
@@ -737,7 +737,7 @@ for(dn in TF_down$ID[which(TF_down$ID %in% rownames(allNES_mat_sel))]){
   ind<-ind+1
   allNES_mat_sel[dn, ]
   
-  istwo <- rep(T, 14)
+  istwo <- rep(T, 15)
   toinvert <- ifelse(sign(allNES_mat_sel[dn, ])==(-1), T, F)
   missing<-which(is.na(toinvert))
   if(length(missing)==0){

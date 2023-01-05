@@ -129,12 +129,11 @@ for(comp in 1:ncol(data_mean_all)){
 save(fgsea_res_drugs, file=paste("fgsea_res_drugs_",DE,".RData", sep=""))
 }
 
-set.seed(1746528)
 cor_up_tot<-list()
 cor_dn_tot<-list()
 n<-0
 i<-0
-for(DE in DEGs_seq){
+for(DE in DEGs_seq[-c(1:3)]){
   i<-i+1
   if(DE %in% mouse_data){
     homologs<-mouse_homologs
