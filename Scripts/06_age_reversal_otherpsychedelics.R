@@ -614,3 +614,162 @@ dev.off()
 ###############
 ### adding Ravi Raju enriched environment dataset
 ###############
+RRF<-read.csv("Data/171107Tsa_RNA_EEvsNH_DESEQ2_ALLROWS_negFlipped_forVolc.csv", row.names = 2)
+homologs<-mouse_homologs
+
+
+genes_up<-unique(RRF$gene.name[which(RRF$log2FoldChange>0 & RRF$pvalue<0.05)])
+genes_dn<-unique(RRF$gene.name[which(RRF$log2FoldChange<0 & RRF$pvalue<0.05)])
+genes_up<-unique(homologs[which(homologs[,2] %in% genes_up),3])
+genes_dn<-unique(homologs[which(homologs[,2] %in% genes_dn),3])
+
+genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
+fgsea_res<-list()
+p<-list()
+df<-list()
+for(n in 1:length(genes_cor)){
+  
+  forgesea<-unlist(genes_cor[[n]])
+  names(forgesea)<-rownames(genes_cor[[n]])
+  forgesea<-forgesea[!is.na(forgesea)]
+  fgsea_res[[n]]<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea)
+  
+  p1<-plotEnrichment(genes_up, forgesea)
+  p2<-plotEnrichment(genes_dn, forgesea)
+  
+  df[[n]]<-rbind.data.frame(data.frame(p1$data, dir=rep("up", nrow(p1$data)), dataset=rep(dat_names[n],nrow(p1$data))), data.frame(p2$data, dir=rep("dn", nrow(p2$data)), dataset=rep(dat_names[n],nrow(p2$data))))
+  
+  p[[n]]<-ggplot(df[[n]], aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+    scale_colour_manual(values=c("dn"="blue", "up"="red"))
+  
+}
+
+pdn[[i]]<-meta_dn(fgsea_res)
+pup[[i]]<-meta_up(fgsea_res)
+
+df_tot<-df[[1]]
+for(n in 2:length(genes_cor)){
+  df_tot<-rbind.data.frame(df_tot, df[[n]])
+}
+
+fgsea_rank<-lapply(fgsea_res, function(x){-log10(x[1,3])*sign(x[1,6])+log10(x[2,3])*sign(x[2,6])})
+
+df_tot$dataset<-factor(df_tot$dataset, levels=dat_names[order(unlist(fgsea_rank), decreasing=T)])
+
+pdf("Results/Figures/GSEA_all_datasets_RRF.pdf", 8, 8)
+print(ggplot(df_tot, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+        scale_colour_manual(values=c("dn"="blue", "up"="red"))+facet_wrap(~dataset, scale="free_x"))
+dev.off()
+save(fgsea_res, file="Results/RData/fgsea_res_RRF.RData")
+
+
+RRM<-read.csv("Data/180821Tsa_RNA_EEvsNH_DESEQ2_filter1_FDRtool_flippedFC_volcano.csv", row.names = 1)
+homologs<-mouse_homologs
+
+
+genes_up<-unique(RRM$gene.name[which(RRM$log2FoldChange>0 & RRM$pvalue<0.05)])
+genes_dn<-unique(RRM$gene.name[which(RRM$log2FoldChange<0 & RRM$pvalue<0.05)])
+genes_up<-unique(homologs[which(homologs[,2] %in% genes_up),3])
+genes_dn<-unique(homologs[which(homologs[,2] %in% genes_dn),3])
+
+genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
+fgsea_res<-list()
+p<-list()
+df<-list()
+for(n in 1:length(genes_cor)){
+  
+  forgesea<-unlist(genes_cor[[n]])
+  names(forgesea)<-rownames(genes_cor[[n]])
+  forgesea<-forgesea[!is.na(forgesea)]
+  fgsea_res[[n]]<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea)
+  
+  p1<-plotEnrichment(genes_up, forgesea)
+  p2<-plotEnrichment(genes_dn, forgesea)
+  
+  df[[n]]<-rbind.data.frame(data.frame(p1$data, dir=rep("up", nrow(p1$data)), dataset=rep(dat_names[n],nrow(p1$data))), data.frame(p2$data, dir=rep("dn", nrow(p2$data)), dataset=rep(dat_names[n],nrow(p2$data))))
+  
+  p[[n]]<-ggplot(df[[n]], aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+    scale_colour_manual(values=c("dn"="blue", "up"="red"))
+  
+}
+
+pdn[[i]]<-meta_dn(fgsea_res)
+pup[[i]]<-meta_up(fgsea_res)
+
+df_tot<-df[[1]]
+for(n in 2:length(genes_cor)){
+  df_tot<-rbind.data.frame(df_tot, df[[n]])
+}
+
+fgsea_rank<-lapply(fgsea_res, function(x){-log10(x[1,3])*sign(x[1,6])+log10(x[2,3])*sign(x[2,6])})
+
+df_tot$dataset<-factor(df_tot$dataset, levels=dat_names[order(unlist(fgsea_rank), decreasing=T)])
+
+pdf("Results/Figures/GSEA_all_datasets_RRM.pdf", 8, 8)
+print(ggplot(df_tot, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+        scale_colour_manual(values=c("dn"="blue", "up"="red"))+facet_wrap(~dataset, scale="free_x"))
+dev.off()
+save(fgsea_res, file="Results/RData/fgsea_res_RRM.RData")
+
+##################
+## collapsing GSEA p (no random drugs)
+##################
+p_dn<-c()
+p_up<-c()
+for(DE in c(DEGs_array, DEGs_seq, "GSE75772", "RRF", "RRM")){
+  load(paste("Results/RData/fgsea_res_", DE, ".RData", sep=""))
+  
+  p_dn<-c(p_dn, meta_dn(fgsea_res))
+  p_up<-c(p_up, meta_up(fgsea_res))
+  
+}
+load(paste("Results/RData/fgsea_res.RData", sep=""))
+p_dn<-c(p_dn, meta_dn(fgsea_res))
+p_up<-c(p_up, meta_up(fgsea_res))
+
+#p_dn[p_dn==0]<-10^(-200)
+
+df<-data.frame(pup=-log10(unlist(p_up)), pdn=-log10(unlist(p_dn)), dataset=c(DEGs_array, DEGs_seq, "GSE75772", "RRF", "RRM","LSD"))
+ggplot(df, aes(x=pup, y=pdn, label=dataset))+geom_point()+geom_label_repel()+
+  theme_classic()+
+  geom_vline(aes(xintercept= -log10(0.05)), colour="red", linetype="dashed")+
+  geom_hline(aes(yintercept= -log10(0.05)), colour="red", linetype="dashed")
+
+
+p_dn_rev<-c()
+p_up_rev<-c()
+for(DE in c(DEGs_array, DEGs_seq, "GSE75772", "RRF", "RRM")){
+  load(paste("Results/RData/fgsea_res_", DE, ".RData", sep=""))
+  
+  p_dn_rev<-c(p_dn_rev, meta_dn_rev(fgsea_res))
+  p_up_rev<-c(p_up_rev, meta_up_rev(fgsea_res))
+  
+}
+load(paste("Results/RData/fgsea_res.RData", sep=""))
+p_dn_rev<-c(p_dn_rev, meta_dn_rev(fgsea_res))
+p_up_rev<-c(p_up_rev, meta_up_rev(fgsea_res))
+
+df_rev<-data.frame(pup=-log10(unlist(p_up_rev)), pdn=-log10(unlist(p_dn_rev)), dataset=c(DEGs_array, DEGs_seq, "GSE75772", "RRF","RRM","LSD"))
+
+df_diff<-data.frame(pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=gsub("DE_", "", c(DEGs_array, DEGs_seq, "GSE75772","RRF","RRM", "LSD")))
+
+dataset<-c("MDMA", "Ketamine (long term)", "DOI (2h)", 
+           "LSD (single)", "Exercise", "Alcohol", "Alcohol", "Alcohol",
+           "DMT", "DOI (24h)", "DOI (48h)", "DOI (7days)",
+           "Psilocybin (3h)", "Psilocybin (4weeks)", "Ketamine (single)",
+           "Harmaline", "Pharmahuasca", "Exercise","EE (Young)", "EE (Old)", 
+           "Rat aging", "EE M", "EE F","LSD (chronic)")
+type<-rep("Psychoplastogen", length(dataset))
+type[c(5, 18:20, 22, 23)]<-"Positive Control"
+type[c(6,7,8,21)]<-"Negative Control"
+
+df<-data.frame(pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=dataset,
+               type=type)
+
+pdf("Results/Figures/All_psychedelicsAndCTRL_rataging_RR.pdf",6.5,5.5)
+ggplot(df, aes(x=pup_diff, y=pdn_diff, label=dataset, colour=type))+geom_point()+geom_text_repel()+
+  theme_classic()+
+  geom_vline(aes(xintercept= 0), colour="red", linetype="dashed")+
+  geom_hline(aes(yintercept= 0), colour="red", linetype="dashed")+
+  scale_colour_manual(values=c("Positive Control"="#8E24AA", "Negative Control"="#F57C00", "Psychoplastogen"="black"))
+dev.off()
