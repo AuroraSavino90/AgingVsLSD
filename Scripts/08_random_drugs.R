@@ -84,7 +84,7 @@ for(comp in 1:ncol(data_mean_all)){
   }
   
 }
-save(fgsea_res_drugs, file="fgsea_res_drugs_RAW.RData")
+save(fgsea_res_drugs, file="Results/RData/fgsea_res_drugs_RAW.RData")
 
 load("Results/RData/fgsea_res.RData")
 
