@@ -268,3 +268,84 @@ pheatmap(log10(allp_mat_sel_dementia[rownames(toplot_sel),]), cellwidth=15, cell
          annotation_row = anno, annotation_colors = annotation_colors)
 dev.off()
 
+
+
+##############
+### Randomizations
+###############
+library(msigdbr)
+library(clusterProfiler)
+rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
+genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
+
+m_df <- msigdbr(species = "Homo sapiens", category = "C3", subcategory = "TFT:TFT_Legacy" ) %>% 
+  dplyr::select(gs_name, gene_symbol)
+
+
+
+set.seed(47569275)
+m_df_rand<-cbind(m_df$gs_name[sample(1:nrow(m_df), nrow(m_df), replace=F)],
+            m_df$gene_symbol)
+
+fgsea_MsigdbC3_rand_tot<-list()
+for(iter in 1:100){
+  print(iter)
+fgsea_MsigdbC3_rand<-list()
+p<-list()
+df<-list()
+for(n in 1:length(genes_cor)){
+  forgesea<-unlist(genes_cor[[n]])
+  names(forgesea)<-rownames(genes_cor[[n]])
+  forgesea<-forgesea[!is.na(forgesea)]
+  forgesea<-forgesea[names(forgesea) %in% rat_homologs]
+  fgsea_MsigdbC3_rand[[n]]<-GSEA(sort(forgesea, decreasing=T), TERM2GENE=m_df_rand, pvalueCutoff = 1, maxGSSize = 10000)
+  
+}
+fgsea_MsigdbC3_rand_tot[[iter]]<-fgsea_MsigdbC3_rand
+}
+
+save(fgsea_MsigdbC3_rand_tot, file="Results/RData/fgsea_MsigdbC3_rand_tot.RData")
+
+########
+pup_rand<-list()
+
+for(iter in 1:100){
+  pup_rand[[iter]]<-list()
+allp_mat_rand<-matrix(NA,nrow=length(allpaths), ncol=length(fgsea_MsigdbC3_rand_tot[[iter]]))
+rownames(allp_mat_rand)<-allpaths
+for(i in 1:length(fgsea_MsigdbC3_rand_tot[[iter]])){
+  allp_mat_rand[fgsea_MsigdbC3_rand_tot[[iter]][[i]]$ID,i]<-fgsea_MsigdbC3_rand_tot[[iter]][[i]]$pvalue
+}
+
+allNES_mat_rand<-matrix(0,nrow=length(allpaths), ncol=length(fgsea_MsigdbC3_rand_tot[[iter]]))
+rownames(allNES_mat_rand)<-allpaths
+for(i in 1:length(fgsea_MsigdbC3_rand_tot[[iter]])){
+  allNES_mat_rand[fgsea_MsigdbC3_rand_tot[[iter]][[i]]$ID,i]<-fgsea_MsigdbC3_rand_tot[[iter]][[i]]$NES
+}
+
+ind<-0
+for(up in names(pup)){
+  ind<-ind+1
+  
+  istwo <- rep(T, length(genes_cor))
+  toinvert <- ifelse(sign(allNES_mat_rand[up, ])==(1), T, F)
+  missing<-which(is.na(toinvert))
+  if(length(missing)==0){
+    pup_rand[[iter]][[ind]]<-sumlog(two2one(allp_mat_rand[up, ], two = istwo, invert = toinvert))[[3]]
+  } else {
+    pup_rand[[iter]][[ind]]<-sumlog(two2one(allp_mat_rand[up, ][-missing], two = istwo[-missing], invert = toinvert[-missing]))[[3]]
+  }
+}
+names(pup_rand[[iter]])<-names(pup)
+}
+
+path_p_rand<-matrix(nrow=length(pup), ncol=100)
+rownames(path_p_rand)<-names(pup)
+for(path in names(pup)){
+  for(iter in 1:100){
+    path_p_rand[path, iter]<-pup_rand[[iter]][[path]]
+  }
+}
+
+rowSums(path_p_rand<pup)[names(pup[order(unlist(pup))[1:20]])]
+
