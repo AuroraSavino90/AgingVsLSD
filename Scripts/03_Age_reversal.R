@@ -1,19 +1,25 @@
+#########################
+##########################
+######### Is LDS reverting aging?
+##########################
+##########################
 rm(list=ls())
-setwd("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVSLSD")
-load("RData/Alldata_27May.RData")
+setwd("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVsLSD")
 
-##################################
-load("RData/DE_GSE179379.RData")
+load("Results/RData/DE_GSE179379.RData")
+load("Results/RData/Alldata_20Sep.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
+
+################################
+####### gsea lsd vs aging
+###############################
 
 library(fgsea)
 library(ggplot2)
 region<-c("DLPFC")
 diagnosis<-"Healthy"
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
-dat<-setdiff(dat, c("GSE30272"))#tmp
-dat<-setdiff(dat, c("GSE102741"))#batch PC1>40% of variance
-dat<-setdiff(dat, c("GSE5388"))#outlier
+dat<-setdiff(dat, c("GSE5388", "GSE102741"))#outlier
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]
@@ -30,27 +36,20 @@ for(dd in dat){
   data<-data[, sample]
   age<-metadata$Age[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
   age<-as.numeric(age)
-  gender<-metadata$Gender[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
-  if(length(which(age>6570))>=10){
-    sample<-sample[which(age>6570)]
+  if(length(which(age>7300))>=10){
+    sample<-sample[which(age>7300)]
     data<-data[, sample]
-    gender<-gender[which(age>6570)]
-    age<-age[which(age>6570)]
+    age<-age[which(age>7300)]
     
-    if(length(table(gender))>1){
-      data_resid<-apply(data,1, function(x){residuals(lm(unlist(x)~gender))})
-      data_resid<-t(data_resid)
-      
-    genes_cor[[n]]<-cor(t(data_resid), as.numeric(age))
+    genes_cor[[n]]<-cor(t(data), as.numeric(age))
     dat_names<-c(dat_names, dd)
-    }
   }
 }
 
 region<-"PFC"
 diagnosis<-"Healthy"
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
-dat<-setdiff(dat, c("GSE102741"))#batch PC1>40% of variance
+dat<-setdiff(dat, c("GSE5388", "GSE102741"))#outlier
 
 for(dd in dat){
   n<-n+1
@@ -59,20 +58,13 @@ for(dd in dat){
   data<-data[, sample]
   age<-metadata$Age[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
   age<-as.numeric(age)
-  gender<-metadata$Gender[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]
-  if(length(which(age>6570))>=10){
-    sample<-sample[which(age>6570)]
+  if(length(which(age>=7300))>=10){
+    sample<-sample[which(age>=7300)]
     data<-data[, sample]
-    gender<-gender[which(age>6570)]
-    age<-age[which(age>6570)]
+    age<-age[which(age>=7300)]
     
-    if(length(table(gender))>1){
-      data_resid<-apply(data,1, function(x){residuals(lm(unlist(x)~gender))})
-      data_resid<-t(data_resid)
-      
-      genes_cor[[n]]<-cor(t(data_resid), as.numeric(age))
-      dat_names<-c(dat_names, dd)
-    }
+    genes_cor[[n]]<-cor(t(data), as.numeric(age))
+    dat_names<-c(dat_names, dd)
   }
 }
 #LSD
@@ -88,7 +80,7 @@ for(n in 1:length(genes_cor)){
   names(forgesea)<-rownames(genes_cor[[n]])
   forgesea<-forgesea[!is.na(forgesea)]
   forgesea<-forgesea[names(forgesea) %in% rat_homologs]
-  fgsea_res[[n]]<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea)
+  fgsea_res[[n]]<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea, nPermSimple=100000)
   
   p1<-plotEnrichment(genes_up, forgesea)
   p2<-plotEnrichment(genes_dn, forgesea)
@@ -111,40 +103,9 @@ fgsea_rank<-lapply(fgsea_res, function(x){-log10(x[1,3])*sign(x[1,6])+log10(x[2,
 
 df_tot$dataset<-factor(df_tot$dataset, levels=dat_names[order(unlist(fgsea_rank), decreasing=T)])
 
-pdf("Results/Figures/GSEA_all_datasets_gender.pdf", 8, 8)
+pdf("Results/Figures/GSEA_all_datasets_RAW.pdf", 8, 8)
 ggplot(df_tot, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
   scale_colour_manual(values=c("dn"="blue", "up"="red"))+facet_wrap(~dataset, scale="free_x")
 dev.off()
 
-
-library(metap)
-
-meta_dn<-function(x){
-  istwo <- rep(T, 10)
-  toinvert <- ifelse(sign(unlist(lapply(x, function(x){x[1,6]})))==(-1), T, F)
-  missing<-which(is.na(toinvert))
-  if(length(missing)==0){
-    p<-sumlog(two2one(unlist(lapply(x, function(x){x[1,3]})), two = istwo, invert = toinvert))
-  } else {
-    p<-sumlog(two2one(unlist(lapply(x, function(x){x[1,3]}))[-missing], two = istwo[-missing], invert = toinvert[-missing]))
-    
-  }
-  
-  return(p[[3]])
-}
-
-meta_up<-function(x){
-  istwo <- rep(T, 10)
-  toinvert <- ifelse(sign(unlist(lapply(x, function(x){x[2,6]})))==(1), T, F)
-  missing<-which(is.na(toinvert))
-  if(length(missing)==0){
-    p<-sumlog(two2one(unlist(lapply(x, function(x){x[2,3]})), two = istwo, invert = toinvert))
-  } else {
-    p<-sumlog(two2one(unlist(lapply(x, function(x){x[2,3]}))[-missing], two = istwo[-missing], invert = toinvert[-missing]))
-  }
-  return(p[[3]])
-}
-
-pdn<-meta_dn(fgsea_res)
-pup<-meta_up(fgsea_res)
-
+save(fgsea_res, file="Results/RData/fgsea_res.RData")

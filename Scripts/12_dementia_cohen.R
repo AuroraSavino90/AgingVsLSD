@@ -1,7 +1,9 @@
-load("Results/RData/ExerciseAndAlcohol.RData")
+rm(list=ls())
 load("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Psychedelics metanalysis/Psychedelics_PFC.RData")
+load("Results/RData/Alldata_20Sep.RData")
+load("Results/RData/ExerciseAndAlcohol.RData")
 load("~/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Dementia/Dementia_alldata.RData")
-load("RData/DE_GSE179379.RData")
+load("Results/RData/DE_GSE179379.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
 library(pheatmap)
 source("Scripts/Dementia_meta.R")
@@ -161,7 +163,8 @@ pheatmap(forheat[,order(forheat[1,], decreasing = T)], cluster_cols = F,  cellwi
 
 
 df<-data.frame(cohen=c(cohen_up, cohen_dn), direction=rep(c("up with drug", "dn with drug"), each=length(cohen_up)),
-               pval= -log10(c(p_up, p_dn)) )
+               pval= -log10(c(p_up, p_dn)),
+               disease=rep(c("AD", "AD", "AD", "AD", "AD", "HD", "PDD", "DLB"),2))
 
 gg<-ggplot(df, aes(x=cohen, y=pval, colour=direction))+geom_point()+theme_classic()+ labs(x = "Cohen's d", y = "-log10(pvalue)")+
   geom_vline(xintercept=0, linetype='dashed', color='grey', size=0.5)+theme_classic()+scale_colour_manual(values=c("dn with drug"="blue", "up with drug"="red"))
@@ -170,8 +173,6 @@ pdf("Results/Figures/dementia_LSD.pdf",5,5)
 print(gg)
 dev.off()
 
-
-print(gg)
 
 library(metap)
 
@@ -203,23 +204,24 @@ p_dn_LSD_inv<-sumlog(two2one(p_dn, two = istwo, invert = toinvert))
 rat_homologs<-read.csv("Data/Human rat homologs.txt")
 mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 
-mouse_data<-c("DE_GSE64607","DE_GSE38465_SAMP8","DE_GSE38465_SAMR1","DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626","DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",
-              "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks", "DE_GSE30880")
+mouse_data<-c("DE_GSE64607","DE_GSE164798_chronic", "DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626",
+              "DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",
+              "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks",
+              "DE_GSE105453_Y", "DE_GSE105453_O", "DE_GSE111273_Y", "DE_GSE111273_O")
 rat_data<-c("DE_GSE14720", "DE_GSE23728","DE_GSE179380","DE_DMT", "DE_pharm", "DE_harm")
 ##MDMA
 DEGs_array<-c("DE_MDMA",
-              
               "DE_GSE26364",
               #DOI
-              
               "DE_GSE23728",
               #LSD
               "DE_GSE179380", 
-              "DE_GSE64607","DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57",
-              "DE_GSE30880")
+              "DE_GSE64607","DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57"
+              
+)
 
-DEGs_seq<-c("DE_DMT","DE_GSE161626","DE_GSE161626_48h","DE_GSE161626_7d", "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks",
-            "DE_GSE81672", "DE_harm", "DE_pharm")
+DEGs_seq<-c("DE_DMT", "DE_GSE161626","DE_GSE161626_48h","DE_GSE161626_7d", "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks",
+            "DE_GSE81672", "DE_harm", "DE_pharm", "DE_GSE164798_chronic", "DE_GSE111273_Y", "DE_GSE111273_O")
 
 p_up_tot<-c()
 p_dn_tot<-c()
@@ -584,14 +586,15 @@ ggplot(df, aes(x=pup, y=pdn, label=dataset))+geom_point()+geom_label_repel()+
 
 
 
-dataset<-c( "LSD (chronic)", "MDMA", "Ketamine (long term)", "DOI (2h)", 
+dataset<-c("MDMA", "Ketamine (long term)", "DOI (2h)", 
            "LSD (single)", "Exercise", "Alcohol", "Alcohol", "Alcohol",
-           "Enriched Environment", "DMT", "DOI (24h)", "DOI (48h)", "DOI (7days)",
+           "DMT", "DOI (24h)", "DOI (48h)", "DOI (7days)",
            "Psilocybin (3h)", "Psilocybin (4weeks)", "Ketamine (single)",
-           "Harmaline", "Pharmahuasca")
+           "Harmaline", "Pharmahuasca", "Exercise","EE (Young)", "EE (Old)", 
+           "LSD (chronic)")
 type<-rep("Psychoplastogen", length(dataset))
-type[c(6,10)]<-"Positive Control"
-type[c(7,8,9)]<-"Negative Control"
+type[c(5, 18:20)]<-"Positive Control"
+type[c(6,7,8)]<-"Negative Control"
 
 df<-data.frame(pup=c(-log10(c(p_up_LSD$p, unlist(p_up_tot)))+log10(c(p_up_LSD_inv$p, unlist(p_up_tot_inv)))), 
                pdn=c(-log10(c(p_dn_LSD$p,unlist(p_dn_tot)))+log10(c(p_dn_LSD_inv$p, unlist(p_dn_tot_inv)))), dataset=dataset, direction="increase aging",
@@ -605,5 +608,3 @@ ggplot(df, aes(x=pup, y=pdn, label=dataset, colour=type))+geom_point()+geom_text
   scale_colour_manual(values=c("Positive Control"="#8E24AA", "Negative Control"="#F57C00", "Psychoplastogen"="black"))
 dev.off()
 
-
-#TODO same with random drugs

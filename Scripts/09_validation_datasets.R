@@ -86,7 +86,7 @@ ggplot(df, aes(PC1, PC2, colour=brain.bank.ch1))+geom_point()
 
 library(fgsea)
 library(ggplot2)
-load("RData/DE_GSE179379.RData")
+load("Results/RData/DE_GSE179379.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
@@ -100,9 +100,9 @@ genes_dn<-unique(homologs[which(homologs[,2] %in% genes_dn),3])
   data<-GSE60862[, sample]
   age<-GSE60862_meta$`age at death (in years):ch1`[which(GSE60862_meta$`brain region:ch1`=="frontal cortex")]
   age<-as.numeric(age)*365
-    sample<-sample[which(age>6570)]
+    sample<-sample[which(age>=7300)]
     data<-data[, sample]
-    age<-age[which(age>6570)]
+    age<-age[which(age>=7300)]
 
     genes_cor<-cor(t(data), as.numeric(age))
 rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
@@ -111,7 +111,7 @@ rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
   names(forgesea)<-rownames(genes_cor)
   forgesea<-forgesea[!is.na(forgesea)]
   forgesea<-forgesea[names(forgesea) %in% rat_homologs]
-  fgsea_res<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea, nPermSimple=100000)
+  fgsea_res<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea)
 
   p1<-plotEnrichment(genes_up, forgesea)
   p2<-plotEnrichment(genes_dn, forgesea)
@@ -122,9 +122,9 @@ rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
   data<-GSE36192[, sample]
   age<-GSE36192_meta$`age (y):ch1`[which(GSE36192_meta$`tissue:ch1`=="frontal cortex")]
   age<-as.numeric(age)*365
-  sample<-sample[which(age>6570)]
+  sample<-sample[which(age>=7300)]
   data<-data[, sample]
-  age<-age[which(age>6570)]
+  age<-age[which(age>=7300)]
 
   genes_cor<-cor(t(data), as.numeric(age))
   rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
@@ -133,7 +133,7 @@ rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
   names(forgesea)<-rownames(genes_cor)
   forgesea<-forgesea[!is.na(forgesea)]
   forgesea<-forgesea[names(forgesea) %in% rat_homologs]
-  fgsea_res<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea, nPermSimple=100000)
+  fgsea_res<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea)
 
   p1<-plotEnrichment(genes_up, forgesea)
   p2<-plotEnrichment(genes_dn, forgesea)
@@ -159,9 +159,9 @@ rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
 
   age<-gsub(" Y", "", age)
   age<-as.numeric(age)*365
-  sample<-sample[which(age>6570)]
+  sample<-sample[which(age>=7300)]
   data<-data[, sample]
-  age<-age[which(age>6570)]
+  age<-age[which(age>=7300)]
 
   genes_cor<-cor(t(data), as.numeric(age))
   rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
@@ -184,6 +184,4 @@ rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
   print(p)
   dev.off()
 
-  #TODO
-  ####Ripetere con altri psichedelici
-
+  
