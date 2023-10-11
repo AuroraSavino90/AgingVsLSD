@@ -1,5 +1,6 @@
 rm(list=ls())
-load("Results/RData/Alldata_20Sep.RData")
+setwd("workdir")#workdir = working directory
+load("Data/Alldata_20Sep.RData")
 signature<-read.csv("Data/ACEL-17-e12819-s002.csv")
 signature_up<-signature$Gene.Symbol[signature$Microarray=="up"]
 signature_dn<-signature$Gene.Symbol[signature$Microarray=="down"]

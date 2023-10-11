@@ -1,12 +1,14 @@
+rm(list=ls())
+setwd("workdir")#workdir = working directory
 #################################################
 #########GSEA with the batch corrected dataset
 ##################################################
-load("Results/RData/ExerciseAndAlcohol.RData")
+load("Data/ExerciseAndAlcohol.RData")
 load("Results/RData/alldata_resid.RData")
 load("Results/RData/age_all.RData")
 
-load("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Psychedelics metanalysis/Psychedelics_PFC.RData")
-load("Results/RData/Alldata_20Sep.RData")
+load("Data/Psychedelics_PFC.RData")
+load("Data/Alldata_20Sep.RData")
 rat_homologs<-read.csv("Data/Human rat homologs.txt")
 mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 

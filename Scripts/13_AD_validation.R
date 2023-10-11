@@ -1,8 +1,8 @@
 rm(list=ls())
-setwd("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVsLSD")
+setwd("workdir")#workdir = working directory
 
 load("Results/RData/DE_GSE179379.RData")
-load("Results/RData/Alldata_20Sep.RData")
+load("Data/Alldata_20Sep.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
 
 

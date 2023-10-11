@@ -1,3 +1,7 @@
+rm(list=ls())
+setwd("workdir")#workdir = working directory
+
+
 changenames<-function(data, anno){
   annotation_sel=anno[match( rownames(data), anno[,1]),2]
   

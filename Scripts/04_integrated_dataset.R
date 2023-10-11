@@ -1,9 +1,9 @@
 rm(list=ls())
-setwd("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVsLSD")
+setwd("workdir")#workdir = working directory
 
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-load("Results/RData/Alldata_20Sep.RData")
+load("Data/Alldata_20Sep.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
 
 region<-c("DLPFC")
@@ -107,7 +107,6 @@ plot(age_all, svobj[[1]][,6], col=as.factor(dataset_all))
 plot(age_all, svobj[[1]][,7], col=as.factor(dataset_all))
 plot(age_all, svobj[[1]][,8], col=as.factor(dataset_all))
 
-alldata_resid<-apply(alldata,1, function(x){residuals(lm(unlist(x)~svobj[[1]][,1]+svobj[[1]][,2]+svobj[[1]][,3]+svobj[[1]][,4]+svobj[[1]][,5]+svobj[[1]][,6]+svobj[[1]][,7]+svobj[[1]][,8]))})
 alldata_resid<-apply(alldata,1, function(x){residuals(lm(unlist(x)~svobj[[1]][,1:28]))})
 #alldata_resid<-apply(alldata,1, function(x){residuals(lm(unlist(x)~svobj[[1]][,1]+svobj[[1]][,2]+svobj[[1]][,3]+svobj[[1]][,4]+svobj[[1]][,5]+svobj[[1]][,6]+svobj[[1]][,7]))})
 alldata_resid<-t(alldata_resid)

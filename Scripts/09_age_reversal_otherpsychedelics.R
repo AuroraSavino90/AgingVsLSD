@@ -1,11 +1,13 @@
+rm(list=ls())
+setwd("workdir")#workdir = working directory
 ################################
 ####### gsea lsd vs aging
 ###############################
 library(fgsea)
 library(ggplot2)
-load("Results/RData/ExerciseAndAlcohol.RData")
-load("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Psychedelics metanalysis/Psychedelics_PFC.RData")
-load("Results/RData/Alldata_20Sep.RData")
+load("Data/ExerciseAndAlcohol.RData")
+load("Data/Psychedelics_PFC.RData")
+load("Data/Alldata_20Sep.RData")
 rat_homologs<-read.csv("Data/Human rat homologs.txt")
 mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 

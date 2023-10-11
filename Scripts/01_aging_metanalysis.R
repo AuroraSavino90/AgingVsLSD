@@ -1,5 +1,5 @@
 rm(list=ls())
-setwd("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/AgingVsLSD")
+setwd("workdir")#workdir = working directory
 
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")

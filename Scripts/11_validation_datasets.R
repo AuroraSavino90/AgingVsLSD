@@ -1,3 +1,6 @@
+rm(list=ls())
+setwd("workdir")#workdir = working directory
+
 library(GEOquery)
 library(ggplot2)
 #preprocessing
