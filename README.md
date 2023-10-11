@@ -22,3 +22,8 @@ Input data can be downloaded at (link) and placed in the project folder.
 - 13_AD_validation: employs an external Alzheimer disease dataset to validate the age-reversal effect of chronic LSD
 - 14_Signature_agreement: comparison of aging gene expression signatures obtained in the current study with the gene expression signature obtained by Donertas et al, 2018.
 - 15_Gender_correct: tests chronic LSD age-reversal effect regressing out gender from gene expression
+
+## ShinyApp
+The code to run the ShinyApp to test the age-reversal potential of user-provided gene lists in human brain aging can be found in the ShinyApp folder.
+To run the app, download the code and the data deposited at the link.
+Open the R file, install the required packages and then run runApp("shiny_dataset_react.R").
