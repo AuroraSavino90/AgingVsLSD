@@ -25,5 +25,8 @@ Input data can be downloaded at (link) and placed in the project folder.
 
 ## ShinyApp
 The code to run the ShinyApp to test the age-reversal potential of user-provided gene lists in human brain aging can be found in the ShinyApp folder.
-To run the app, download the code and the data deposited at the link.
+
+To run the app, download the code and the data deposited at the link https://doi.org/10.5281/zenodo.8431269.
+Place the downloaded data in the Data folder within the working directory containing the R code.
+
 Open the R file, install the required packages and then run runApp("shiny_dataset_react.R").
