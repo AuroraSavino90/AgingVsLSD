@@ -2,11 +2,10 @@ rm(list=ls())
 load("/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Psychedelics metanalysis/Psychedelics_PFC.RData")
 load("Results/RData/Alldata_20Sep.RData")
 load("Results/RData/ExerciseAndAlcohol.RData")
-load("~/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Dementia/Dementia_alldata.RData")
+load("Results/RData/Dementia_alldata_meta.RData")
 load("Results/RData/DE_GSE179379.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
 library(pheatmap)
-source("Scripts/Dementia_meta.R")
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]
