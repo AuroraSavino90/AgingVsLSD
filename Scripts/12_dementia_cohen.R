@@ -1,4 +1,6 @@
 rm(list=ls())
+setwd("workdir")#workdir = working directory
+
 load("Data/Psychedelics_PFC.RData")
 load("Data/Alldata_20Sep.RData")
 load("Data/ExerciseAndAlcohol.RData")
@@ -24,6 +26,9 @@ p_dn<-c()
 dat_names<-c()
 for(dd in dat){
   data<-get(dd)
+  if(sum(is.na(data))>0){
+  data<- data[-which(is.na(data), arr.ind = T)[,1],]
+  }
   sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   data<-data[, sample]
   age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -49,6 +54,9 @@ dat<-na.omit(unique(metadata$Dataset[metadata$Diagnosis %in% diagnosis & metadat
 
 for(dd in dat){
   data<-get(dd)
+  if(sum(is.na(data))>0){
+    data<- data[-which(is.na(data), arr.ind = T)[,1],]
+  }
   sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   data<-data[, sample]
   age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -76,6 +84,9 @@ diagnosis<-c("Healthy","Huntington")
 
 for(dd in dat){
   data<-get(dd)
+  if(sum(is.na(data))>0){
+    data<- data[-which(is.na(data), arr.ind = T)[,1],]
+  }
   sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   data<-data[, sample]
   age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -102,6 +113,9 @@ diagnosis<-c("Healthy","PDD")
 
 for(dd in dat){
   data<-get(dd)
+  if(sum(is.na(data))>0){
+    data<- data[-which(is.na(data), arr.ind = T)[,1],]
+  }
   sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   data<-data[, sample]
   age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -128,6 +142,9 @@ diagnosis<-c("Healthy","DLB")
 
 for(dd in dat){
   data<-get(dd)
+  if(sum(is.na(data))>0){
+    data<- data[-which(is.na(data), arr.ind = T)[,1],]
+  }
   sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   data<-data[, sample]
   age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -255,6 +272,9 @@ for(DE in DEGs_array){
   dat_names<-c()
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -280,6 +300,9 @@ for(DE in DEGs_array){
   
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -307,6 +330,9 @@ for(DE in DEGs_array){
   
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -333,6 +359,9 @@ for(DE in DEGs_array){
   
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -359,6 +388,9 @@ for(DE in DEGs_array){
   
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -430,6 +462,9 @@ for(DE in DEGs_seq){
   dat_names<-c()
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -455,6 +490,9 @@ for(DE in DEGs_seq){
   
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -482,6 +520,9 @@ for(DE in DEGs_seq){
   
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -508,6 +549,9 @@ for(DE in DEGs_seq){
   
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
@@ -534,6 +578,9 @@ for(DE in DEGs_seq){
   
   for(dd in dat){
     data<-get(dd)
+    if(sum(is.na(data))>0){
+      data<- data[-which(is.na(data), arr.ind = T)[,1],]
+    }
     sample<-metadata$Sample[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     data<-data[, sample]
     age<-metadata$Age[which(metadata$Dataset==dd & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]

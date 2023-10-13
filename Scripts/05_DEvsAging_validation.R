@@ -1,40 +1,15 @@
 rm(list=ls())
+setwd("workdir")#workdir = working directory
 library(biomaRt)
 library(openxlsx)
 library(ggplot2)
 library(DESeq2)
 library(FactoMineR)
 
+source("Scripts/utilities.R")
+
 meta<-read.xlsx("Data/Samples.xlsx",1)
 meta$dose[meta$dose=="ctrl"]<-0
-
-#change names in gene symbols
-changenames<-function(data, anno){
-  annotation_sel=anno[match( rownames(data), anno[,1]),2]
-  
-  if(length(which(annotation_sel==""))>0){
-    data<-data[-which(annotation_sel==""),]
-    annotation_sel<-annotation_sel[-which(annotation_sel=="")]
-  }
-  
-  a<-which(duplicated(annotation_sel))
-  while(length(a)>0){
-    for(i in 1:length(unique(annotation_sel))){
-      if(length(which(annotation_sel==unique(annotation_sel)[i]))>1){
-        m=which.max(rowMeans(data[which(annotation_sel==unique(annotation_sel)[i]),], na.rm=T))
-        data=data[-which(annotation_sel==unique(annotation_sel)[i])[-m],]
-        annotation_sel=annotation_sel[-which(annotation_sel==unique(annotation_sel)[i])[-m]]
-      }
-    }
-    
-    data=data[which(is.na(annotation_sel)==F),]
-    annotation_sel=na.omit(annotation_sel)
-    a<-which(duplicated(annotation_sel))
-  }
-  
-  rownames(data)=annotation_sel
-  return(data)
-}
 
 #load counts
 filesL1<-list.files("Data/Counts", pattern="L001")
@@ -102,9 +77,9 @@ DE_50 <- DESeq2::results(dds, contrast = c("dose", "50", "0"))
 library(fgsea)
 library(ggrepel)
 
-load("D:/OneDrive - Htechnopole/Documents/Work/Projects/Psychedelics/AgingVsLSD/Results/RData/Alldata_20Sep.RData")
-rat_homologs<-read.csv("D:/OneDrive - Htechnopole/Documents/Work/Projects/Psychedelics/AgingVsLSD/Data/Human rat homologs.txt", sep="\t")
-mouse_homologs<-read.csv("D:/OneDrive - Htechnopole/Documents/Work/Projects/Psychedelics/AgingVsLSD/Data/Human mouse homologs.txt", sep="\t")
+load("Data/Alldata_20Sep.RData")
+rat_homologs<-read.csv("Data/Human rat homologs.txt", sep="\t")
+mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 
 library(metap)
 

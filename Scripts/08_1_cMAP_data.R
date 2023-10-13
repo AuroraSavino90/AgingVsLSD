@@ -4,7 +4,7 @@ library(slinky)
 
 # update following lines with your details:
 user_key <- "XXX"
-gctx <- "XXX"
+gctx <- "XXX"#path to GSE70138_Broad_LINCS_Level4_ZSPCINF_mlr12k_n345976x12328.gctx file
 info <- "XXX"
 sl <- Slinky(user_key, gctx, info)
 
@@ -29,4 +29,4 @@ names(data_mean)<-gene_info$pr_gene_symbol[match(names(data_mean), gene_info$pr_
 data_mean_all[,comp]<-data_mean
 }
 rownames(data_mean_all)<-names(data_mean)
-save(data_mean_all, file="CMAP_NPC_mean.RData")
+save(data_mean_all, file="Results/RData/CMAP_NPC_mean.RData")

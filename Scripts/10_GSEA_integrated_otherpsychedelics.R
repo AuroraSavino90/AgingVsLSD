@@ -70,11 +70,11 @@ p2<-plotEnrichment(genes_dn, forgesea)
 df<-rbind.data.frame(data.frame(p1$data, dir=rep("up", nrow(p1$data))), 
                      data.frame(p2$data, dir=rep("dn", nrow(p2$data))))
 
-p<-ggplot(df, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+p<-ggplot(df, aes(x=rank, y=ES, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
   scale_colour_manual(values=c("dn"="blue", "up"="red"))
 
 pdf(paste("Results/Figures/GSEA_all_batchcorrect_", DE, ".pdf", sep=""), 5,4)
-print(ggplot(df, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+print(ggplot(df, aes(x=rank, y=ES, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
   scale_colour_manual(values=c("dn"="blue", "up"="red")))
 dev.off()
 }
@@ -115,11 +115,11 @@ for(DE in DEGs_seq){
   df<-rbind.data.frame(data.frame(p1$data, dir=rep("up", nrow(p1$data))), 
                        data.frame(p2$data, dir=rep("dn", nrow(p2$data))))
   
-  p<-ggplot(df, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+  p<-ggplot(df, aes(x=rank, y=ES, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
     scale_colour_manual(values=c("dn"="blue", "up"="red"))
   
   pdf(paste("Results/Figures/GSEA_all_batchcorrect_", DE, ".pdf", sep=""), 5,4)
-  print(ggplot(df, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+  print(ggplot(df, aes(x=rank, y=ES, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
     scale_colour_manual(values=c("dn"="blue", "up"="red")))
   dev.off()
 }

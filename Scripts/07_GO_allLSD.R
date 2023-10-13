@@ -382,10 +382,6 @@ for(n in 2:length(genes_cor)){
   df_tot<-rbind.data.frame(df_tot, df[[n]])
 }
 
-ggplot(df_tot, aes(scaled, y, colour=dataset))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())
-
-
-###which genes of FOS and EGR1?
 GO_mat<-matrix(0,nrow=length(unique(unlist(genes_go))), ncol=length(genes_cor))
 rownames(GO_mat)<-unique(unlist(genes_go))
 for(i in 1:length(genes_cor)){

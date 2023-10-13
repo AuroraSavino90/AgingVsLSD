@@ -3,7 +3,7 @@ setwd("workdir")#workdir = working directory
 
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-load("Results/RData/Alldata_20Sep.RData")
+load("Data/Alldata_20Sep.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
 
 library(pheatmap)
@@ -57,7 +57,7 @@ for(dd in dat){
 }
 colnames(binned)<-c(1:max(as.numeric(metadata$Age)/365, na.rm=T))
 binned<-binned[order(age_median),]
-dev.off()
+graphics.off()
 pdf("Results/Figures/age_datasets.pdf", 16, 6)
 pheatmap(log2(binned+1), cluster_cols = F, cluster_rows = F, cellwidth = 10, cellheight = 15)
 dev.off()
@@ -191,7 +191,7 @@ length(myBreaks) == length(paletteLength) + 1
 p<-pheatmap(cor_datasets, cellwidth=15, cellheight=15, breaks=myBreaks,
             color = myColor)
 
-dev.off()
+graphics.off()
 pdf("Results/Figures/Aging_similarity.pdf",8,8)
 print(p)
 dev.off()

@@ -12,6 +12,8 @@ homologs<-read.csv("Data/Human rat homologs.txt")
 library(clusterProfiler)
 library(fgsea)
 library(ggplot2)
+library(org.Hs.eg.db)
+
 region<-c("DLPFC")
 diagnosis<-"Healthy"
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))

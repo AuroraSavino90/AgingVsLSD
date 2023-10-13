@@ -1,5 +1,6 @@
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+
 load("Data/Alldata_20Sep.RData")
 signature<-read.csv("Data/ACEL-17-e12819-s002.csv")
 signature_up<-signature$Gene.Symbol[signature$Microarray=="up"]
@@ -87,7 +88,7 @@ for(n in 2:length(genes_cor)){
 }
 
 pdf("Results/Figures/GSEA_siganture.pdf",8,8)
-ggplot(df_signature, aes(scaled, y, colour=path))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+ggplot(df_signature, aes(x=rank, y=ES, colour=path))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
   facet_wrap(.~dataset)+ scale_colour_manual(values=c("signature_dn"="blue", "signature_up"="red"))
 dev.off()
 

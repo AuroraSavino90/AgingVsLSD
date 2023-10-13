@@ -107,7 +107,7 @@ plot(age_all, svobj[[1]][,6], col=as.factor(dataset_all))
 plot(age_all, svobj[[1]][,7], col=as.factor(dataset_all))
 plot(age_all, svobj[[1]][,8], col=as.factor(dataset_all))
 
-alldata_resid<-apply(alldata,1, function(x){residuals(lm(unlist(x)~svobj[[1]][,1:28]))})
+alldata_resid<-apply(alldata,1, function(x){residuals(lm(unlist(x)~svobj[[1]][,1:n.sv]))})
 #alldata_resid<-apply(alldata,1, function(x){residuals(lm(unlist(x)~svobj[[1]][,1]+svobj[[1]][,2]+svobj[[1]][,3]+svobj[[1]][,4]+svobj[[1]][,5]+svobj[[1]][,6]+svobj[[1]][,7]))})
 alldata_resid<-t(alldata_resid)
 
@@ -160,7 +160,7 @@ rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
     scale_colour_manual(values=c("dn"="blue", "up"="red"))
 
 pdf("Results/Figures/GSEA_all_batchcorrect.pdf", 5,4)
-ggplot(df, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+ggplot(df, aes(x=rank, y=ES, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
   scale_colour_manual(values=c("dn"="blue", "up"="red"))
 dev.off()
 

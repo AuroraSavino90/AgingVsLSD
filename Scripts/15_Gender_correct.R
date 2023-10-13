@@ -1,5 +1,6 @@
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+
 load("Results/RData/DE_GSE179379.RData")
 load("Data/Alldata_20Sep.RData")
 
@@ -60,7 +61,7 @@ diagnosis<-"Healthy"
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region]))
 dat<-setdiff(dat, c("GSE102741", "GSE5388"))#batch PC1>40% of variance
 
-for(dd in dat){
+for(dd in setdiff(dat, "GSE59630")){#only one sample in GSE59630
   n<-n+1
   data<-get(dd)
   sample<-metadata$Sample[which(metadata$Dataset==dd &metadata$Organism=="Homo sapiens" & metadata$Diagnosis==diagnosis & metadata$Region_simpl %in% region)]

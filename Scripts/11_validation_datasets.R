@@ -3,42 +3,13 @@ setwd("workdir")#workdir = working directory
 
 library(GEOquery)
 library(ggplot2)
-#preprocessing
-#change names in gene symbols
-
-changenames<-function(data, anno){
-  annotation_sel=anno[match( rownames(data), anno[,1]),2]
-
-  if(length(which(annotation_sel==""))>0){
-    data<-data[-which(annotation_sel==""),]
-    annotation_sel<-annotation_sel[-which(annotation_sel=="")]
-  }
-
-  a<-which(duplicated(annotation_sel))
-  while(length(a)>0){
-    for(i in 1:length(unique(annotation_sel))){
-      if(length(which(annotation_sel==unique(annotation_sel)[i]))>1){
-        m=which.max(rowMeans(data[which(annotation_sel==unique(annotation_sel)[i]),], na.rm=T))
-        data=data[-which(annotation_sel==unique(annotation_sel)[i])[-m],]
-        annotation_sel=annotation_sel[-which(annotation_sel==unique(annotation_sel)[i])[-m]]
-      }
-    }
-
-    data=data[which(is.na(annotation_sel)==F),]
-    annotation_sel=na.omit(annotation_sel)
-    a<-which(duplicated(annotation_sel))
-  }
-
-  rownames(data)=annotation_sel
-  return(data)
-}
-
+source("Scripts/utilities.R")
 
 ################################
 ##########GSE46706, gene-level
 ###############################GSE60862
 
-gds<-getGEO("GSE60862",destdir="/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Aging", AnnotGPL = TRUE)
+gds<-getGEO("GSE60862",destdir="Data/", AnnotGPL = TRUE)
 
 GSE60862<-exprs(gds$GSE60862_series_matrix.txt.gz)
 GSE60862_meta<-pData(gds$GSE60862_series_matrix.txt.gz)
@@ -53,7 +24,7 @@ GSE60862<-changenames(data=GSE60862, anno=cbind(GSE60862_anno$ID, symbols))
 ##########GSE36192
 ###############################
 
-gds<-getGEO("GSE36192",destdir="/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Aging", AnnotGPL = TRUE)
+gds<-getGEO("GSE36192",destdir="Data/", AnnotGPL = TRUE)
 
 GSE36192<-exprs(gds$GSE36192_series_matrix.txt.gz)
 GSE36192_meta<-pData(gds$GSE36192_series_matrix.txt.gz)
@@ -65,7 +36,7 @@ GSE36192<-changenames(data=GSE36192, anno=cbind(GSE36192_anno$ID, GSE36192_anno$
 ##########GSE25219
 ###############################
 
-gds<-getGEO("GSE25219",destdir="/Users/aurora.savino/Library/CloudStorage/OneDrive-Htechnopole/Documents/Work/Projects/Metanalyses/Aging", AnnotGPL = TRUE)
+gds<-getGEO("GSE25219",destdir="Data/", AnnotGPL = TRUE)
 
 GSE25219<-exprs(gds$`GSE25219-GPL5175_series_matrix.txt.gz`)
 GSE25219_meta<-pData(gds$`GSE25219-GPL5175_series_matrix.txt.gz`)

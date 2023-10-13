@@ -1,41 +1,14 @@
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+source("Scripts/utilities.R")
 
-
-changenames<-function(data, anno){
-  annotation_sel=anno[match( rownames(data), anno[,1]),2]
-  
-  if(length(which(annotation_sel==""))>0){
-    data<-data[-which(annotation_sel==""),]
-    annotation_sel<-annotation_sel[-which(annotation_sel=="")]
-  }
-  
-  a<-which(duplicated(annotation_sel))
-  while(length(a)>0){
-    for(i in 1:length(unique(annotation_sel))){
-      if(length(which(annotation_sel==unique(annotation_sel)[i]))>1){
-        m=which.max(rowMeans(data[which(annotation_sel==unique(annotation_sel)[i]),], na.rm=T))
-        data=data[-which(annotation_sel==unique(annotation_sel)[i])[-m],]
-        annotation_sel=annotation_sel[-which(annotation_sel==unique(annotation_sel)[i])[-m]]
-      }
-    }
-    
-    data=data[which(is.na(annotation_sel)==F),]
-    annotation_sel=na.omit(annotation_sel)
-    a<-which(duplicated(annotation_sel))
-  }
-  
-  rownames(data)=annotation_sel
-  return(data)
-}
 
 library(data.table)
 GTEx_PFC <- fread('Data/gene_reads_2017-06-05_v8_brain_frontal_cortex_ba9.gct.gz',data.table=FALSE)
 rownames(GTEx_PFC)<-GTEx_PFC[,2]
 
 library("biomaRt")
-ensembl=useMart("ensembl")
-ensembl = useDataset("hsapiens_gene_ensembl",mart=ensembl)
+ensembl = useMart(biomart="ensembl", dataset="hsapiens_gene_ensembl",host="https://useast.ensembl.org")
 genes_conv<-getBM(attributes = c('ensembl_gene_id','hgnc_symbol'),
                   values = gsub("\\..*","",rownames(GTEx_PFC)), 
                   mart = ensembl)

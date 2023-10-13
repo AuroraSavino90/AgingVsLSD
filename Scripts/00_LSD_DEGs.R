@@ -5,7 +5,7 @@ load("Data/Psychedelics_PFC.RData")
 library(DESeq2)
 
 ###normalization
-#GSE179379<-GSE179379[which(rowSums(GSE179379>=5)>=5),]
+
 dds <- DESeqDataSetFromMatrix(countData = GSE179379,
                               colData = data.frame(treatment=rep(c("LSD", "Saline"), each=10)),
                               design= ~ treatment)
