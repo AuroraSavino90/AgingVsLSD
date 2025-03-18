@@ -192,24 +192,24 @@ dev.off()
 
 library(metap)
 
-istwo <- rep(F, length(cohen_up))
+istwo <- rep(T, length(cohen_up))
 toinvert <- ifelse(cohen_up<0, T, F)
 
 p_up_LSD<-sumlog(two2one(p_up, two = istwo, invert = toinvert))
 
 
-istwo <- rep(F, length(cohen_dn))
+istwo <- rep(T, length(cohen_dn))
 toinvert <- ifelse(cohen_dn>0, T, F)
 
 p_dn_LSD<-sumlog(two2one(p_dn, two = istwo, invert = toinvert))
 
-istwo <- rep(F, length(cohen_up))
+istwo <- rep(T, length(cohen_up))
 toinvert <- ifelse(cohen_up>0, T, F)
 
 p_up_LSD_inv<-sumlog(two2one(p_up, two = istwo, invert = toinvert))
 
 
-istwo <- rep(F, length(cohen_dn))
+istwo <- rep(T, length(cohen_dn))
 toinvert <- ifelse(cohen_dn<0, T, F)
 
 p_dn_LSD_inv<-sumlog(two2one(p_dn, two = istwo, invert = toinvert))
@@ -408,24 +408,24 @@ for(DE in DEGs_array){
     dat_names<-c(dat_names, dd)
   }
   
-  istwo <- rep(F, length(cohen_up))
+  istwo <- rep(T, length(cohen_up))
   toinvert <- ifelse(cohen_up<0, T, F)
   
   p_up_tot<-c(p_up_tot, sumlog(two2one(p_up, two = istwo, invert = toinvert))$p)
   
   
-  istwo <- rep(F, length(cohen_dn))
+  istwo <- rep(T, length(cohen_dn))
   toinvert <- ifelse(cohen_dn>0, T, F)
   
   p_dn_tot<-c(p_dn_tot, sumlog(two2one(p_dn, two = istwo, invert = toinvert))$p)
   
-  istwo <- rep(F, length(cohen_up))
+  istwo <- rep(T, length(cohen_up))
   toinvert <- ifelse(cohen_up>0, T, F)
   
   p_up_tot_inv<-c(p_up_tot_inv, sumlog(two2one(p_up, two = istwo, invert = toinvert))$p)
   
   
-  istwo <- rep(F, length(cohen_dn))
+  istwo <- rep(T, length(cohen_dn))
   toinvert <- ifelse(cohen_dn<0, T, F)
   
   p_dn_tot_inv<-c(p_dn_tot_inv, sumlog(two2one(p_dn, two = istwo, invert = toinvert))$p)
@@ -598,24 +598,24 @@ for(DE in DEGs_seq){
     dat_names<-c(dat_names, dd)
   }
   
-  istwo <- rep(F, length(cohen_up))
+  istwo <- rep(T, length(cohen_up))
   toinvert <- ifelse(cohen_up<0, T, F)
   
   p_up_tot<-c(p_up_tot, sumlog(two2one(p_up, two = istwo, invert = toinvert))$p)
   
   
-  istwo <- rep(F, length(cohen_dn))
+  istwo <- rep(T, length(cohen_dn))
   toinvert <- ifelse(cohen_dn>0, T, F)
   
   p_dn_tot<-c(p_dn_tot, sumlog(two2one(p_dn, two = istwo, invert = toinvert))$p)
   
-  istwo <- rep(F, length(cohen_up))
+  istwo <- rep(T, length(cohen_up))
   toinvert <- ifelse(cohen_up>0, T, F)
   
   p_up_tot_inv<-c(p_up_tot_inv, sumlog(two2one(p_up, two = istwo, invert = toinvert))$p)
   
   
-  istwo <- rep(F, length(cohen_dn))
+  istwo <- rep(T, length(cohen_dn))
   toinvert <- ifelse(cohen_dn<0, T, F)
   
   p_dn_tot_inv<-c(p_dn_tot_inv, sumlog(two2one(p_dn, two = istwo, invert = toinvert))$p)
@@ -633,10 +633,10 @@ ggplot(df, aes(x=pup, y=pdn, label=dataset))+geom_point()+geom_label_repel()+
 
 
 dataset<-c("MDMA", "Ketamine (long term)", "DOI (2h)", 
-           "LSD (single)", "Exercise", "Alcohol", "Alcohol", "Alcohol",
+           "LSD (single)", "Exercise (28d)", "Alcohol (vapour chamber)", "Alcohol (vapour chamber 2)", "Alcohol (IP injection)",
            "DMT", "DOI (24h)", "DOI (48h)", "DOI (7days)",
            "Psilocybin (3h)", "Psilocybin (4weeks)", "Ketamine (single)",
-           "Harmaline", "Pharmahuasca", "Exercise","EE (Young)", "EE (Old)", 
+           "Harmaline", "Pharmahuasca", "Exercise (30d)","EE (Young)", "EE (Old)", 
            "LSD (chronic)")
 type<-rep("Psychoplastogen", length(dataset))
 type[c(5, 18:20)]<-"Positive Control"
@@ -653,4 +653,7 @@ ggplot(df, aes(x=pup, y=pdn, label=dataset, colour=type))+geom_point()+geom_text
   geom_hline(aes(yintercept= 0), colour="red", linetype="dashed")+
   scale_colour_manual(values=c("Positive Control"="#8E24AA", "Negative Control"="#F57C00", "Psychoplastogen"="black"))
 dev.off()
+
+
+
 
