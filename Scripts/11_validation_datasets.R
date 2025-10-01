@@ -4,21 +4,7 @@ setwd("workdir")#workdir = working directory
 library(GEOquery)
 library(ggplot2)
 source("Scripts/utilities.R")
-
-################################
-##########GSE46706, gene-level
-###############################GSE60862
-
-gds<-getGEO("GSE60862",destdir="Data/", AnnotGPL = TRUE)
-
-GSE60862<-exprs(gds$GSE60862_series_matrix.txt.gz)
-GSE60862_meta<-pData(gds$GSE60862_series_matrix.txt.gz)
-GSE60862_anno<-fData(gds$GSE60862_series_matrix.txt.gz)
-
-symbols<-gsub('([^/]*)//([^/]*)//.*', '\\2', GSE60862_anno$gene_assignment)
-symbols<-gsub(' ', '', symbols)
-
-GSE60862<-changenames(data=GSE60862, anno=cbind(GSE60862_anno$ID, symbols))
+options(timeout = 5000)
 
 ################################
 ##########GSE36192
@@ -31,6 +17,7 @@ GSE36192_meta<-pData(gds$GSE36192_series_matrix.txt.gz)
 GSE36192_anno<-fData(gds$GSE36192_series_matrix.txt.gz)
 
 GSE36192<-changenames(data=GSE36192, anno=cbind(GSE36192_anno$ID, GSE36192_anno$`Gene symbol`))
+GSE36192<-log2(GSE36192)
 
 ################################
 ##########GSE25219
@@ -48,15 +35,7 @@ symbols<-gsub(' ', '', symbols)
 GSE25219<-changenames(data=GSE25219, anno=cbind(GSE25219_anno$ID, symbols))
 
 ##########
-#probabilmente i campioni GSE60862 sono tutti in GSE36192, usare solo  GSE36192 che è più grande
-match(paste(GSE60862_meta$`age at death (in years):ch1`,GSE60862_meta$`post-mortem interval (in hours):ch1`, tolower(GSE60862_meta$`Sex:ch1`))[GSE60862_meta$`brain region:ch1`=="frontal cortex"], paste(GSE36192_meta$`age (y):ch1`,GSE36192_meta$`pmi (hr):ch1`, GSE36192_meta$`gender:ch1`)[GSE36192_meta$`tissue:ch1`=="frontal cortex"])
 
-GSE36192<-log2(GSE36192)
-
-
-pca<-prcomp(t(GSE60862[,which(GSE60862_meta$`brain region:ch1`=="frontal cortex")]))
-df<-data.frame(PC1=pca$x[,1],PC2=pca$x[,2], GSE60862_meta[which(GSE60862_meta$`brain region:ch1`=="frontal cortex"),])
-ggplot(df, aes(PC1, PC2, colour=brain.bank.ch1))+geom_point()
 
 library(fgsea)
 library(ggplot2)
@@ -69,26 +48,6 @@ genes_up<-unique(homologs[which(homologs[,2] %in% genes_up),3])
 genes_dn<-unique(homologs[which(homologs[,2] %in% genes_dn),3])
 
 
-
-  sample<-GSE60862_meta$geo_accession[which(GSE60862_meta$`brain region:ch1`=="frontal cortex")]
-  data<-GSE60862[, sample]
-  age<-GSE60862_meta$`age at death (in years):ch1`[which(GSE60862_meta$`brain region:ch1`=="frontal cortex")]
-  age<-as.numeric(age)*365
-    sample<-sample[which(age>=7300)]
-    data<-data[, sample]
-    age<-age[which(age>=7300)]
-
-    genes_cor<-cor(t(data), as.numeric(age))
-rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
-
-  forgesea<-unlist(genes_cor)
-  names(forgesea)<-rownames(genes_cor)
-  forgesea<-forgesea[!is.na(forgesea)]
-  forgesea<-forgesea[names(forgesea) %in% rat_homologs]
-  fgsea_res<-fgsea(list(UP=genes_up, DN=genes_dn), forgesea)
-
-  p1<-plotEnrichment(genes_up, forgesea)
-  p2<-plotEnrichment(genes_dn, forgesea)
 
 #############
 
@@ -114,7 +73,7 @@ rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
 
   df<-rbind.data.frame(data.frame(p1$data, dir=rep("up", nrow(p1$data))), data.frame(p2$data, dir=rep("dn", nrow(p2$data))))
 
-  p<-ggplot(df, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+  p<-ggplot(df, aes(rank, ES, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
     scale_colour_manual(values=c("dn"="blue", "up"="red"))
 
   pdf("Results/Figures/GSEA_GSE36192.pdf", 4, 4)
@@ -151,7 +110,7 @@ rat_homologs<-unique(homologs[homologs[,2] %in% rownames(DE_GSE179379),3])
 
   df<-rbind.data.frame(data.frame(p1$data, dir=rep("up", nrow(p1$data))), data.frame(p2$data, dir=rep("dn", nrow(p2$data))))
 
-  p<-ggplot(df, aes(x, y, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
+  p<-ggplot(df, aes(rank, ES, colour=dir))+geom_line()+ geom_hline(yintercept = 0, size=0.5)+ theme(panel.background = element_blank())+
     scale_colour_manual(values=c("dn"="blue", "up"="red"))
 
   pdf("Results/Figures/GSEA_GSE25219.pdf", 4, 4)
