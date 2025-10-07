@@ -291,7 +291,9 @@ ggplot(df, aes(x=pup_diff, y=pdn_diff, label=dataset))+geom_point()+geom_text_re
   theme_classic()+
   geom_vline(aes(xintercept= 0), colour="red", linetype="dashed")+
   geom_hline(aes(yintercept= 0), colour="red", linetype="dashed")+
-  scale_colour_manual(values=c("Positive Control"="#8E24AA", "Negative Control"="#F57C00", "Psychoplastogen"="black"))
+  scale_colour_manual(values=c("Positive Control"="#8E24AA", "Negative Control"="#F57C00", "Psychoplastogen"="black"))+
+  xlim(-50,50)+
+  ylim(-250, 250)
 dev.off()
 
 ##########
