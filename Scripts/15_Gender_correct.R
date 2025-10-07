@@ -46,7 +46,7 @@ for(dd in dat){
     
      
     if(length(table(gender))>1){
-      data_resid<-apply(data,1, function(x){residuals(lm(unlist(x)~gender))})
+      data_resid<-matrix(unlist(apply(data,1, function(x){residuals(lm(unlist(x)~gender))})), nrow=ncol(data))
       data_resid<-t(data_resid)
       
     genes_cor[[n]]<-cor(t(data_resid), as.numeric(age))

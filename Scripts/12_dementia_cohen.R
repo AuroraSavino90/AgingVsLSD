@@ -8,6 +8,7 @@ load("Data/Dementia_alldata_meta.RData")
 load("Results/RData/DE_GSE179379.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
 library(pheatmap)
+library(ggplot2)
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]
@@ -35,9 +36,11 @@ for(dd in dat){
   age<-as.numeric(age)
   disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   disease<-factor(disease, levels=c("Healthy", "Alzheimer"))
-
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
-
+  ## build GSVA parameter object
+  gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
+  
+  ## estimate GSVA enrichment scores for the three sets
+  ssgsea <- gsva(gsvapar)
 
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Alzheimer"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Alzheimer"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Alzheimer"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Alzheimer"])^2)/2))
@@ -64,8 +67,11 @@ for(dd in dat){
   disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   disease<-factor(disease, levels=c("Healthy", "Alzheimer"))
 
-  ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
-
+  ## build GSVA parameter object
+  gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
+  
+  ## estimate GSVA enrichment scores for the three sets
+  ssgsea <- gsva(gsvapar)
 
   cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Alzheimer"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Alzheimer"])^2)/2))
   cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Alzheimer"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Alzheimer"])^2)/2))
@@ -94,8 +100,11 @@ for(dd in dat){
   disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   disease<-factor(disease, levels=c("Healthy", "Huntington"))
 
-  ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
-
+  ## build GSVA parameter object
+  gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
+  
+  ## estimate GSVA enrichment scores for the three sets
+  ssgsea <- gsva(gsvapar)
 
   cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Huntington"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Huntington"])^2)/2))
   cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Huntington"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Huntington"])^2)/2))
@@ -123,8 +132,11 @@ for(dd in dat){
   disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   disease<-factor(disease, levels=c("Healthy", "PDD"))
 
-  ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
-
+  ## build GSVA parameter object
+  gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
+  
+  ## estimate GSVA enrichment scores for the three sets
+  ssgsea <- gsva(gsvapar)
 
   cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="PDD"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="PDD"])^2)/2))
   cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="PDD"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="PDD"])^2)/2))
@@ -152,8 +164,11 @@ for(dd in dat){
   disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
   disease<-factor(disease, levels=c("Healthy", "DLB"))
 
-  ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
-
+  ## build GSVA parameter object
+  gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
+  
+  ## estimate GSVA enrichment scores for the three sets
+  ssgsea <- gsva(gsvapar)
 
   cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="DLB"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="DLB"])^2)/2))
   cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="DLB"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="DLB"])^2)/2))
@@ -282,8 +297,11 @@ for(DE in DEGs_array){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "Alzheimer"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Alzheimer"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Alzheimer"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Alzheimer"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Alzheimer"])^2)/2))
@@ -310,8 +328,11 @@ for(DE in DEGs_array){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "Alzheimer"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Alzheimer"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Alzheimer"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Alzheimer"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Alzheimer"])^2)/2))
@@ -340,8 +361,11 @@ for(DE in DEGs_array){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "Huntington"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Huntington"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Huntington"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Huntington"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Huntington"])^2)/2))
@@ -369,8 +393,11 @@ for(DE in DEGs_array){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "PDD"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="PDD"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="PDD"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="PDD"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="PDD"])^2)/2))
@@ -398,8 +425,11 @@ for(DE in DEGs_array){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "DLB"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="DLB"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="DLB"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="DLB"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="DLB"])^2)/2))
@@ -472,8 +502,11 @@ for(DE in DEGs_seq){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "Alzheimer"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Alzheimer"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Alzheimer"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Alzheimer"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Alzheimer"])^2)/2))
@@ -500,8 +533,11 @@ for(DE in DEGs_seq){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "Alzheimer"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Alzheimer"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Alzheimer"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Alzheimer"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Alzheimer"])^2)/2))
@@ -530,8 +566,11 @@ for(DE in DEGs_seq){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "Huntington"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="Huntington"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="Huntington"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="Huntington"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="Huntington"])^2)/2))
@@ -559,8 +598,11 @@ for(DE in DEGs_seq){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "PDD"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="PDD"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="PDD"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="PDD"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="PDD"])^2)/2))
@@ -588,8 +630,11 @@ for(DE in DEGs_seq){
     disease<-metadata$Diagnosis[which(metadata$Dataset==dd  & metadata$Diagnosis %in% diagnosis & metadata$Region %in% region)]
     disease<-factor(disease, levels=c("Healthy", "DLB"))
     
-    ssgsea<-gsva(as.matrix(data), list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)), method="ssgsea")
+    ## build GSVA parameter object
+    gsvapar <- ssgseaParam(as.matrix(data), geneSets=list(up=intersect(rownames(data), genes_up),dn=intersect(rownames(data), genes_dn)))
     
+    ## estimate GSVA enrichment scores for the three sets
+    ssgsea <- gsva(gsvapar)
     
     cohen_up<-c(cohen_up, (mean(ssgsea[1,disease=="Healthy"])-mean(ssgsea[1,disease=="DLB"]))/sqrt((sd(ssgsea[1,disease=="Healthy"])^2+sd(ssgsea[1,disease=="DLB"])^2)/2))
     cohen_dn<-c(cohen_dn, (mean(ssgsea[2,disease=="Healthy"])-mean(ssgsea[2,disease=="DLB"]))/sqrt((sd(ssgsea[2,disease=="Healthy"])^2+sd(ssgsea[2,disease=="DLB"])^2)/2))

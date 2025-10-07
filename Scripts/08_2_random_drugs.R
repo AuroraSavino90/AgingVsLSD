@@ -1,6 +1,7 @@
 rm(list=ls())
 setwd("workdir")#workdir = working directory
-
+library(fgsea)
+library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
 load("Data/Alldata_20Sep.RData")
 homologs<-read.csv("Data/Human rat homologs.txt")
@@ -190,12 +191,13 @@ dev.off()
 plot(colSums(better_dn_mat, na.rm=T)/193, colSums(better_up_mat, na.rm=T)/193, xlab="% of tests with higher NES than LSD (dn)",
      ylab="% of tests with NES lower than LSD (up)", pch=19)
 
+library(metap)
+
 p_dn<-sumlog(colSums(better_dn_mat, na.rm=T)/193)
 p_up<-sumlog(colSums(better_up_mat, na.rm=T)/193)
 
 ######evaluation collapsing the pvalue
 
-library(metap)
 
 meta_dn<-function(x){
   istwo <- rep(T, length(x))

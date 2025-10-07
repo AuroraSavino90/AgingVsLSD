@@ -5,6 +5,8 @@ setwd("workdir")#workdir = working directory
 ###############################
 library(fgsea)
 library(ggplot2)
+library(limma)
+library(ggrepel)
 load("Data/ExerciseAndAlcohol.RData")
 load("Data/Psychedelics_PFC.RData")
 load("Data/Alldata_20Sep.RData")

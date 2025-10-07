@@ -37,7 +37,7 @@ pdf("Results/Figures/Region_frequency.pdf",5,5)
 ggplot(metadata, aes(x=Region_simpl))+geom_bar()+theme_classic()
 dev.off()
 
-####Rappresentare il range di et? di ogni dataset
+####Represent each dataset's age range
 dat<-na.omit(unique(metadata$Dataset[metadata$Organism=="Homo sapiens"]))
 binned<-matrix(nrow=length(dat), ncol=max(as.numeric(metadata$Age)/365, na.rm=T))
 rownames(binned)<-dat
@@ -58,7 +58,7 @@ for(dd in dat){
 colnames(binned)<-c(1:max(as.numeric(metadata$Age)/365, na.rm=T))
 binned<-binned[order(age_median),]
 graphics.off()
-pdf("Results/Figures/age_datasets.pdf", 16, 6)
+pdf("Results/Figures/age_datasets.pdf", 18, 6)
 pheatmap(log2(binned+1), cluster_cols = F, cluster_rows = F, cellwidth = 10, cellheight = 15)
 dev.off()
 
