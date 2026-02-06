@@ -71,12 +71,14 @@ range01 <- function(x){(x-min(x))/(max(x)-min(x))}
 p1<-list()
 p2<-list()
 df<-list()
+fgsea_res<-list()
 genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
 for(n in 1:length(genes_cor)){
   forgesea<-unlist(genes_cor[[n]])
   names(forgesea)<-rownames(genes_cor[[n]])
   forgesea<-forgesea[!is.na(forgesea)]
   forgesea<-sort(forgesea, decreasing=T)
+  fgsea_res[[n]]<-fgsea(list(UP=signature_up, DN=signature_dn), forgesea)
   p1[[n]]<-plotEnrichment(unique(signature_up), forgesea)
   p2[[n]]<-plotEnrichment(unique(signature_dn), forgesea)
   df[[n]]<-rbind.data.frame(data.frame(scaled=range01(p1[[n]]$data[,1]), p1[[n]]$data, path=rep("signature_up", nrow(p1[[n]]$data)), dataset=rep(dat_names[n],nrow(p1[[n]]$data))),
@@ -97,12 +99,33 @@ dev.off()
 age_up<-read.csv("Results/age_up.csv")
 age_dn<-read.csv("Results/age_dn.csv")
 
-intersect(signature_up, age_up[,2])
-intersect(signature_dn, age_dn[,2])
+meta_dn<-function(x){
+  istwo <- rep(T, length(dat_names))
+  toinvert <- ifelse(sign(unlist(lapply(x, function(x){x[1,6]})))==(1), T, F)
+  missing<-which(is.na(toinvert))
+  if(length(missing)==0){
+    p<-sumlog(two2one(unlist(lapply(x, function(x){x[1,3]})), two = istwo, invert = toinvert))
+  } else {
+    p<-sumlog(two2one(unlist(lapply(x, function(x){x[1,3]}))[-missing], two = istwo[-missing], invert = toinvert[-missing]))
+    
+  }
+  
+  return(p[[3]])
+}
 
-setdiff(signature_up, age_up[,2])
-setdiff(signature_dn, age_dn[,2])
+meta_up<-function(x){
+  istwo <- rep(T, length(dat_names))
+  toinvert <- ifelse(sign(unlist(lapply(x, function(x){x[2,6]})))==(-1), T, F)
+  missing<-which(is.na(toinvert))
+  if(length(missing)==0){
+    p<-sumlog(two2one(unlist(lapply(x, function(x){x[2,3]})), two = istwo, invert = toinvert))
+  } else {
+    p<-sumlog(two2one(unlist(lapply(x, function(x){x[2,3]}))[-missing], two = istwo[-missing], invert = toinvert[-missing]))
+  }
+  return(p[[3]])
+}
 
-setdiff(age_up[,2], signature_up)
-setdiff(age_dn[,2], signature_dn)
+
+p_dn<-c(meta_dn(fgsea_res))
+p_up<-c(meta_up(fgsea_res))
 

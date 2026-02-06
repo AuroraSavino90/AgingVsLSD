@@ -125,6 +125,7 @@ ggplot(df, aes(PC3, PC4, colour=age))+geom_point()
 pdf("Results/Figures/PC1_SVA_age.pdf",7,5)
 ggplot(df, aes(age, PC1, colour=dataset))+geom_point()+theme_classic()
 dev.off()
+cor.test(df$age, df$PC1)
 
 save(alldata_resid, file="Results/RData/alldata_resid.RData")
 
