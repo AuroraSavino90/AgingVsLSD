@@ -317,11 +317,12 @@ for(DE in DEGs_seq){
   
   save(fgsea_res, file=paste("Results/RData/fgsea_res_", DE, ".RData", sep=""))
 }
-
+save(dat_names, file="Results/RData/dat_names.RData")
 
 ##################
 ## collapsing GSEA p (no random drugs)
 ##################
+#load gsea tests for all interventions and merge p as age-mimicking
 p_dn<-c()
 p_up<-c()
 for(DE in c(DEGs_array, DEGs_seq)){
@@ -331,6 +332,7 @@ for(DE in c(DEGs_array, DEGs_seq)){
   p_up<-c(p_up, meta_up(fgsea_res))
   
 }
+#load gsea for chronic lsd and merge p as age-mimicking
 load(paste("Results/RData/fgsea_res.RData", sep=""))
 p_dn<-c(p_dn, meta_dn(fgsea_res))
 p_up<-c(p_up, meta_up(fgsea_res))
@@ -343,7 +345,7 @@ ggplot(df, aes(x=pup, y=pdn, label=dataset))+geom_point()+geom_label_repel()+
   geom_vline(aes(xintercept= -log10(0.05)), colour="red", linetype="dashed")+
   geom_hline(aes(yintercept= -log10(0.05)), colour="red", linetype="dashed")
 
-
+#load gsea tests for all interventions and merge p for age-reversal
 p_dn_rev<-c()
 p_up_rev<-c()
 for(DE in c(DEGs_array, DEGs_seq)){
@@ -353,9 +355,11 @@ for(DE in c(DEGs_array, DEGs_seq)){
   p_up_rev<-c(p_up_rev, meta_up_rev(fgsea_res))
   
 }
+#load gsea for chronic lsd and merge p for age-reversal
 load(paste("Results/RData/fgsea_res.RData", sep=""))
 p_dn_rev<-c(p_dn_rev, meta_dn_rev(fgsea_res))
 p_up_rev<-c(p_up_rev, meta_up_rev(fgsea_res))
+
 
 df_rev<-data.frame(pup=-log10(unlist(p_up_rev)), pdn=-log10(unlist(p_dn_rev)), dataset=c(DEGs_array, DEGs_seq, "LSD"))
 
@@ -579,8 +583,21 @@ type<-rep("Psychoplastogen", length(dataset))
 type[c(5, 18:20)]<-"Positive Control"
 type[c(6,7,8,21)]<-"Negative Control"
 
+df_all<-data.frame(pup_rev=df_rev$pup, pdn_rev=df_rev$pdn, pup=df$pup, pdn=df$pdn, pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=dataset,
+                   type=type)
+df_all[df_all=="-Inf"]<-(-300)
+df_all[df_all< (-300)]<-(-300)
+df_all[df_all=="Inf"]<-(300)
+df_all$pup_diff= -df$pup+df_rev$pup 
+df_all$pdn_diff= -df$pdn+df_rev$pdn
+library(openxlsx)
+write.xlsx(df_all, file="Results/age_reversal_p_all.xlsx")
+
 df<-data.frame(pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=dataset,
                type=type)
+df[df=="-Inf"]<-(-300)
+df[df< (-300)]<-(-300)
+df[df=="Inf"]<-(300)
 
 pdf("Results/Figures/All_psychedelicsAndCTRL_rataging.pdf",6.5,5.5)
 ggplot(df, aes(x=pup_diff, y=pdn_diff, label=dataset, colour=type))+geom_point()+geom_text_repel()+
@@ -589,4 +606,111 @@ ggplot(df, aes(x=pup_diff, y=pdn_diff, label=dataset, colour=type))+geom_point()
   geom_hline(aes(yintercept= 0), colour="red", linetype="dashed")+
   scale_colour_manual(values=c("Positive Control"="#8E24AA", "Negative Control"="#F57C00", "Psychoplastogen"="black"))
 dev.off()
+
+
+##save all tests' statistics in a table
+library(data.table)
+
+all_res <- list()
+ind<-0
+for (DE in c(DEGs_array, DEGs_seq , "GSE75772")) {
+  ind<-ind+1
+  
+  load(paste0("Results/RData/fgsea_res_", DE, ".RData"))
+  
+  dt_DE <- rbindlist(
+    lapply(seq_along(fgsea_res), function(i) {
+      x <- as.data.table(fgsea_res[[i]])
+      x[, `:=`(aging_dataset=dat_names[i], DE = DE, dataset = dataset[ind], type = type[ind])]
+      x
+    }),
+    use.names = TRUE, fill = TRUE
+  )
+   setcolorder(dt_DE, c( "aging_dataset", "DE", "dataset", setdiff(names(dt_DE), c("DE", "dataset",  "aging_dataset"))))
+  
+  all_res[[DE]] <- dt_DE
+}
+
+ind<-ind+1
+load(paste("Results/RData/fgsea_res.RData", sep=""))
+dt_last <- rbindlist(
+  lapply(seq_along(fgsea_res), function(i) {
+    
+    x <- as.data.table(fgsea_res[[i]])
+    
+    x[, `:=`(
+      aging_dataset=dat_names[i],
+      DE      = "DE_GSE179379",
+      dataset = dataset[ind],
+      type    = "Psychoplastogen"
+    )]
+    
+    x
+  }),
+  use.names = TRUE,
+  fill = TRUE
+)
+setcolorder(dt_last, c( "aging_dataset", "DE", "dataset", setdiff(names(dt_DE), c("DE", "dataset",  "aging_dataset"))))
+all_res[["DE_GSE179379"]] <- dt_last
+
+# tabella finale con TUTTI i DE
+gsea_table <- rbindlist(all_res, use.names = TRUE, fill = TRUE)
+gsea_table<-gsea_table[,c("aging_dataset", "DE",            "dataset",       "pathway",          "padj",         
+                          "NES" ,          "size" ,         "leadingEdge" ,  "type")]
+
+
+colnames(gsea_table)[2:4]<-c("dataset", "intervention", "direction")
+library(openxlsx)
+gsea_table$dataset<-gsub("DE_", "", gsea_table$dataset)
+
+setDT(gsea_table)
+
+# Definizione invert come prima
+gsea_table[, invert_mimick := fifelse(
+  direction == "DN", sign(NES) ==  1,
+  fifelse(direction == "UP", sign(NES) == -1, NA)
+)]
+
+gsea_table[, invert_rev := fifelse(
+  direction == "DN", sign(NES) == -1,
+  fifelse(direction == "UP", sign(NES) ==  1, NA)
+)]
+
+# Creo colonne vuote
+gsea_table[, p_two2one_meta := NA_real_]
+gsea_table[, p_two2one_rev  := NA_real_]
+
+# Indici validi (p dentro (0,1] e invert non NA)
+valid_mimick <- which(
+  !is.na(gsea_table$padj) &
+    gsea_table$padj > 0 &
+    gsea_table$padj <= 1 &
+    !is.na(gsea_table$invert_mimick)
+)
+
+valid_rev <- which(
+  !is.na(gsea_table$padj) &
+    gsea_table$padj > 0 &
+    gsea_table$padj <= 1 &
+    !is.na(gsea_table$invert_rev)
+)
+
+# Applico two2one solo ai validi
+gsea_table$p_two2one_meta[valid_mimick] <-
+  metap::two2one(
+    gsea_table$padj[valid_mimick],
+    two = rep(TRUE, length(valid_mimick)),
+    invert = gsea_table$invert_mimick[valid_mimick]
+  )
+
+gsea_table$p_two2one_rev[valid_rev] <-
+  metap::two2one(
+    gsea_table$padj[valid_rev],
+    two = rep(TRUE, length(valid_rev)),
+    invert = gsea_table$invert_rev[valid_rev]
+  )
+
+write.xlsx(gsea_table, file="Results/all_GSEA_aging.xlsx")
+
+
 
