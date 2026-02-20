@@ -2,8 +2,8 @@ library(metap)
 library(limma)
 library(clusterProfiler)
 library(fgsea)
-Abeta_genes_up<-read.csv(file="results/Abeta_genes_up.csv")[,2]
-Abeta_genes_dn<-read.csv(file="results/Abeta_genes_dn.csv")[,2]
+Abeta_genes_up<-read.csv(file="results/Abeta_genes_up_005.csv")[,2]
+Abeta_genes_dn<-read.csv(file="results/Abeta_genes_dn_005.csv")[,2]
 
 mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 Abeta_genes_up<-unique(mouse_homologs[which(mouse_homologs[,2] %in% Abeta_genes_up),3])
