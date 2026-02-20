@@ -24,6 +24,11 @@ cohen_up<-c()
 cohen_dn<-c()
 p_up<-c()
 p_dn<-c()
+p_up_list<-list()
+p_dn_list<-list()
+cohen_up_list<-list()
+cohen_dn_list<-list()
+
 dat_names<-c()
 for(dd in dat){
   data<-get(dd)
@@ -176,6 +181,11 @@ for(dd in dat){
   p_dn<-c(p_dn, t.test(ssgsea[2,disease=="Healthy"],ssgsea[2,disease=="DLB"])[[3]])
   dat_names<-c(dat_names, dd)
 }
+
+p_up_list[["DE_GSE179379"]]<-p_up
+p_dn_list[["DE_GSE179379"]]<-p_dn
+cohen_up_list[["DE_GSE179379"]]<-cohen_up
+cohen_dn_list[["DE_GSE179379"]]<-cohen_dn
 
 
 forheat<-rbind(cohen_up, cohen_dn)
@@ -436,7 +446,13 @@ for(DE in DEGs_array){
     p_up<-c(p_up, t.test(ssgsea[1,disease=="Healthy"],ssgsea[1,disease=="DLB"])[[3]])
     p_dn<-c(p_dn, t.test(ssgsea[2,disease=="Healthy"],ssgsea[2,disease=="DLB"])[[3]])
     dat_names<-c(dat_names, dd)
+    
   }
+  
+  p_up_list[[DE]]<-p_up
+  p_dn_list[[DE]]<-p_dn
+  cohen_up_list[[DE]]<-cohen_up
+  cohen_dn_list[[DE]]<-cohen_dn
   
   istwo <- rep(T, length(cohen_up))
   toinvert <- ifelse(cohen_up<0, T, F)
@@ -465,6 +481,7 @@ for(DE in DEGs_array){
 
 
 for(DE in DEGs_seq){
+  condition<-c()
   if(DE %in% mouse_data){
     homologs<-mouse_homologs
   } else if(DE %in% rat_data){
@@ -513,7 +530,7 @@ for(DE in DEGs_seq){
     dat_names<-c(dat_names, dd)
     p_up<-c(p_up, t.test(ssgsea[1,disease=="Healthy"],ssgsea[1,disease=="Alzheimer"])[[3]])
     p_dn<-c(p_dn, t.test(ssgsea[2,disease=="Healthy"],ssgsea[2,disease=="Alzheimer"])[[3]])
-    
+    condition<-c(condition, "Alzheimer DLPFC")
   }
   
   region<-"PFC"
@@ -544,6 +561,7 @@ for(DE in DEGs_seq){
     p_up<-c(p_up, t.test(ssgsea[1,disease=="Healthy"],ssgsea[1,disease=="Alzheimer"])[[3]])
     p_dn<-c(p_dn, t.test(ssgsea[2,disease=="Healthy"],ssgsea[2,disease=="Alzheimer"])[[3]])
     dat_names<-c(dat_names, dd)
+    condition<-c(condition, "Alzheimer PFC")
   }
   
   
@@ -577,6 +595,7 @@ for(DE in DEGs_seq){
     p_up<-c(p_up, t.test(ssgsea[1,disease=="Healthy"],ssgsea[1,disease=="Huntington"])[[3]])
     p_dn<-c(p_dn, t.test(ssgsea[2,disease=="Healthy"],ssgsea[2,disease=="Huntington"])[[3]])
     dat_names<-c(dat_names, dd)
+    condition<-c(condition, "Huntington PFC")
   }
   
   
@@ -609,6 +628,7 @@ for(DE in DEGs_seq){
     p_up<-c(p_up, t.test(ssgsea[1,disease=="Healthy"],ssgsea[1,disease=="PDD"])[[3]])
     p_dn<-c(p_dn, t.test(ssgsea[2,disease=="Healthy"],ssgsea[2,disease=="PDD"])[[3]])
     dat_names<-c(dat_names, dd)
+    condition<-c(condition, "PDD DLPFC")
   }
   
   
@@ -641,7 +661,13 @@ for(DE in DEGs_seq){
     p_up<-c(p_up, t.test(ssgsea[1,disease=="Healthy"],ssgsea[1,disease=="DLB"])[[3]])
     p_dn<-c(p_dn, t.test(ssgsea[2,disease=="Healthy"],ssgsea[2,disease=="DLB"])[[3]])
     dat_names<-c(dat_names, dd)
+    condition<-c(condition, "DLB DLPFC")
   }
+  
+  p_up_list[[DE]]<-p_up
+  p_dn_list[[DE]]<-p_dn
+  cohen_up_list[[DE]]<-cohen_up
+  cohen_dn_list[[DE]]<-cohen_dn
   
   istwo <- rep(T, length(cohen_up))
   toinvert <- ifelse(cohen_up<0, T, F)
@@ -667,6 +693,8 @@ for(DE in DEGs_seq){
   
 }
 
+
+
 library(ggrepel)
 df<-data.frame(pup=-log10(c(p_up_LSD$p, unlist(p_up_tot))), pdn=-log10(c(p_dn_LSD$p,unlist(p_dn_tot))), 
                dataset=c("LSD", DEGs_array, DEGs_seq))
@@ -687,8 +715,20 @@ type<-rep("Psychoplastogen", length(dataset))
 type[c(5, 18:20)]<-"Positive Control"
 type[c(6,7,8)]<-"Negative Control"
 
+df_all<-data.frame(pup_rev= -log10(c(p_up_LSD$p,unlist(p_up_tot))),
+                   pup_mimick= -log10(c(p_up_LSD_inv$p, unlist(p_up_tot_inv))),
+pdn_rev= -log10(c(p_dn_LSD$p,unlist(p_dn_tot))),
+pdn_mimick= -log10(c(p_dn_LSD_inv$p, unlist(p_dn_tot_inv))),
+pup_diff=c(-log10(c(p_up_LSD$p, unlist(p_up_tot)))+log10(c(p_up_LSD_inv$p, unlist(p_up_tot_inv)))), 
+pdn_diff=c(-log10(c(p_dn_LSD$p,unlist(p_dn_tot)))+log10(c(p_dn_LSD_inv$p, unlist(p_dn_tot_inv)))), dataset=dataset,
+type=type)
+                   
+library(openxlsx)
+write.xlsx(df_all, file="Results/dementia_p_all.xlsx")
+
+
 df<-data.frame(pup=c(-log10(c(p_up_LSD$p, unlist(p_up_tot)))+log10(c(p_up_LSD_inv$p, unlist(p_up_tot_inv)))), 
-               pdn=c(-log10(c(p_dn_LSD$p,unlist(p_dn_tot)))+log10(c(p_dn_LSD_inv$p, unlist(p_dn_tot_inv)))), dataset=dataset, direction="increase aging",
+               pdn=c(-log10(c(p_dn_LSD$p,unlist(p_dn_tot)))+log10(c(p_dn_LSD_inv$p, unlist(p_dn_tot_inv)))), dataset=dataset,
                type=type)
 
 pdf("Results/Figures/All_psychedelicsAndCTRL_dementia.pdf",6.5,5.5)
@@ -701,4 +741,89 @@ dev.off()
 
 
 
+###create a table with all data
+
+DE_annot <- data.table(
+  DE        = names(p_up_list),
+  DE_label  = dataset[c(21, 1:20)],
+  DE_type   = type[c(21, 1:20)]
+)
+library(data.table)
+
+final_table <- rbindlist(
+  lapply(names(p_up_list), function(DE) {
+    
+    dt_up <- data.table(
+      DE        = DE,
+      dataset_id = dat_names,
+      condition  = condition,   
+      direction = "UP",
+      pvalue    = p_up_list[[DE]],
+      cohen     = cohen_up_list[[DE]]
+    )
+    
+    dt_dn <- data.table(
+      DE        = DE,
+      dataset_id = dat_names,
+      condition  = condition,
+      direction = "DN",
+      pvalue    = p_dn_list[[DE]],
+      cohen     = cohen_dn_list[[DE]]
+    )
+    
+    rbind(dt_up, dt_dn)
+  })
+)
+
+final_table <- merge(
+  final_table,
+  DE_annot,
+  by = "DE",
+  all.x = TRUE
+)
+
+
+library(data.table)
+library(metap)
+
+setDT(final_table)
+
+# usa pvalue o padj (scegline uno)
+p <- as.numeric(final_table$pvalue)   
+
+inv_std <- fifelse(
+  final_table$direction == "UP", final_table$cohen < 0,
+  fifelse(final_table$direction == "DN", final_table$cohen > 0, NA)
+)
+
+inv_inv <- fifelse(
+  final_table$direction == "UP", final_table$cohen > 0,
+  fifelse(final_table$direction == "DN", final_table$cohen < 0, NA)
+)
+
+final_table[, `:=`(p_1t = NA_real_, p_1t_inv = NA_real_)]
+
+ok_std <- !is.na(p) & !is.na(inv_std)
+ok_inv <- !is.na(p) & !is.na(inv_inv)
+
+final_table[, `:=`(
+  inverted_1t     = as.logical(inv_std),  # TRUE/FALSE/NA
+  inverted_1t_inv = as.logical(inv_inv)
+)]
+
+final_table$p_1t[ok_std] <- metap::two2one(
+  p[ok_std],
+  two    = rep(TRUE, sum(ok_std)),
+  invert = inv_std[ok_std]
+)
+
+final_table$p_1t_inv[ok_inv] <- metap::two2one(
+  p[ok_inv],
+  two    = rep(TRUE, sum(ok_inv)),
+  invert = inv_inv[ok_inv]
+)
+
+final_table$DE<-gsub("DE_", "", final_table$DE)
+
+write.xlsx(final_table, file="Results/all_GSEA_dementia.xlsx")
 
