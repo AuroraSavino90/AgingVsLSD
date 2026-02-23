@@ -296,6 +296,85 @@ ggplot(df, aes(x=pup_diff, y=pdn_diff, label=dataset))+geom_point()+geom_text_re
   ylim(-250, 250)
 dev.off()
 
+
+
+library(data.table)
+library(metap)
+
+gsea_dt<-data.frame()
+for(DE in DEGs_seq){
+  load(file=paste("fgsea_res_", DE, ".RData", sep=""))
+  gsea_tmp <- rbindlist(
+    lapply(seq_along(fgsea_res), function(k) {
+      x <- as.data.table(fgsea_res[[k]])
+      x[, `:=`(
+        DE = DE,
+        dataset_id = dat_names[k],
+        direction = as.character(pathway)   # "UP" / "DN"
+      )]
+      x
+    }),
+    use.names = TRUE, fill = TRUE
+  )
+  gsea_dt<-rbind(gsea_dt, gsea_tmp)
+}
+
+p <- as.numeric(gsea_dt$padj)
+
+# effetto per decidere inversione: in fgsea hai NES
+eff <- as.numeric(gsea_dt$NES)
+
+inv_std <- fifelse(
+  gsea_dt$direction == "UP", eff < 0,
+  fifelse(gsea_dt$direction == "DN", eff > 0, NA)
+)
+
+inv_inv <- fifelse(
+  gsea_dt$direction == "UP", eff > 0,
+  fifelse(gsea_dt$direction == "DN", eff < 0, NA)
+)
+
+gsea_dt[, `:=`(p_1t = NA_real_, p_1t_inv = NA_real_,
+               inverted_1t = as.logical(inv_std),
+               inverted_1t_inv = as.logical(inv_inv))]
+
+ok_std <- !is.na(p) & !is.na(inv_std)
+ok_inv <- !is.na(p) & !is.na(inv_inv)
+
+gsea_dt$p_1t[ok_std] <- metap::two2one(
+  p[ok_std],
+  two    = rep(TRUE, sum(ok_std)),
+  invert = inv_std[ok_std]
+)
+
+gsea_dt$p_1t_inv[ok_inv] <- metap::two2one(
+  p[ok_inv],
+  two    = rep(TRUE, sum(ok_inv)),
+  invert = inv_inv[ok_inv]
+)
+
+write.xlsx(gsea_dt, file="Results/all_GSEA_invivo.xlsx")
+
+
+
+df_rev<-data.frame(pup=-log10(unlist(p_up_rev)), pdn=-log10(unlist(p_dn_rev)), dataset=c( DEGs_seq))
+
+df_diff<-data.frame(pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=gsub("DE_", "", c(DEGs_seq)))
+
+df<-data.frame(pup=-log10(unlist(p_up)), pdn=-log10(unlist(p_dn)), dataset=c(DEGs_seq))
+
+
+df_all<-data.frame(pup_rev=df_rev$pup, pdn_rev=df_rev$pdn, pup=df$pup, pdn=df$pdn, pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=gsub("DE_", "", c(DEGs_seq)))
+df_all$pup_diff= -df$pup+df_rev$pup 
+df_all$pdn_diff= -df$pdn+df_rev$pdn
+df_all[df_all=="-Inf"]<-(-300)
+df_all[df_all< (-300)]<-(-300)
+df_all[df_all=="Inf"]<-(300)
+
+library(openxlsx)
+write.xlsx(df_all, file="Results/invivo_metap_all.xlsx")
+
+
 ##########
 ## GO for LSD
 #########
