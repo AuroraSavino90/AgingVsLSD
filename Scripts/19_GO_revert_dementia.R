@@ -271,7 +271,7 @@ all_stats_up<-cbind(pathway=LSD_up_terms_both, nes_mat_dem[LSD_up_terms_both, ],
 write.xlsx(all_stats_up, "results/GO_all_stats_up_dementia.xlsx")
 
 all_stats_dn<-cbind(pathway=LSD_dn_terms_both, nes_mat_dem[LSD_dn_terms_both, ], p_mat_dem[LSD_dn_terms_both, ], data.frame(lsd_dn)[LSD_dn_terms_both,-6], 
-                    logFDRLSD=-log10(unlist(data.frame(lsd_dn)[LSD_dn_terms_both,6])),logFDRAging=-log10(q_dem_for_LSDup[LSD_dn_terms_both]))
+                    logFDRLSD=-log10(unlist(data.frame(lsd_dn)[LSD_dn_terms_both,6])),logFDRAging=-log10(q_dem_for_LSDdn[LSD_dn_terms_both]))
 write.xlsx(all_stats_dn, "results/GO_all_stats_dn_dementia.xlsx")
 
 # ============================================================
@@ -415,10 +415,8 @@ genesets_desc <- genesets_desc[lengths(genesets_desc) >= 10]
 saveRDS(genesets_desc, file=file.path(outdir_inv, "genesets_opposite_GO_desc_mouse.rds"))
 
 # -----------------------------
-# Load in vitro RNA-seq + ComBat-seq + log2 RPM (same as invitro_GO)
+# Load in vitro RNA-seq
 # -----------------------------
-if(!file.exists(xlsx_metadata)) stop("Missing: ", xlsx_metadata)
-if(!file.exists(tsv_counts))    stop("Missing: ", tsv_counts)
 
 meta_iv <- openxlsx::read.xlsx(xlsx_metadata, rowNames = TRUE)
 
@@ -437,30 +435,27 @@ meta_iv$Trt <- rep(c("Ct", "LSD", "Abeta", "Abeta", "Abeta",
                      "Abeta + LSD", "Abeta + LSD", "Abeta + LSD"), 3)
 meta_iv$Trt <- factor(meta_iv$Trt, levels = c("Ct", "LSD", "Abeta", "Abeta + LSD"))
 
-adj <- sva::ComBat_seq(as.matrix(counts), batch = meta_iv$Replicate, group = NULL)
-expr <- log2(t(t(adj) / colSums(adj)) * 1e6 + 1)
+expr <- log2(t(t(as.matrix(counts)) / colSums(as.matrix(counts))) * 1e6 + 1)
 
 grp <- droplevels(meta_iv$Trt)
 keep <- grp %in% c("Abeta", "Abeta + LSD")
 grp2 <- droplevels(grp[keep])
 expr_sub <- expr[, keep, drop=FALSE]
 
+meta_sub <- meta_iv[keep, , drop = FALSE]
+meta_sub$Replicate <- droplevels(as.factor(meta_sub$Replicate))
 
 # -----------------------------
 # CAMERA (limma) on gene-level expression
 # -----------------------------
-design_s <- model.matrix(~ 0 + grp2)
-colnames(design_s) <- make.names(levels(grp2))
+design_g <- model.matrix(~ 0 + grp2 + Replicate , data = meta_sub)
+colnames(design_g)[1:length(levels(grp2))] <- make.names(levels(grp2))
 
-contr <- limma::makeContrasts(Abeta...LSD - Abeta, levels = design_s)
-
+contr <- limma::makeContrasts(`Abeta...LSD` - Abeta, levels = design_g)
 
 idx <- genesets_to_index(genesets_desc, rownames(expr_sub), min_size = 10)
 
-design_g <- model.matrix(~ 0 + grp2)
-colnames(design_g) <- levels(grp2)
-
-cam <- limma::camera(expr_sub, index = idx, design = design_g, contrast = contr[,1])
+cam <- limma::camera(expr_sub, index = idx, design = design_g, contrast = contr[, 1])
 tab_camera <- cam %>%
   as.data.frame() %>%
   rownames_to_column("Description") %>%
@@ -468,6 +463,7 @@ tab_camera <- cam %>%
   arrange(PValue)
 
 write.csv(tab_camera, file=file.path(outdir_inv, "camera_AbetaLSD_vs_Abeta.csv"), row.names=FALSE)
+write.xlsx(tab_camera, file=file.path(outdir_inv, "camera_AbetaLSD_vs_Abeta.xlsx"), row.names=FALSE)
 
 # -----------------------------
 # Merge + save
@@ -493,11 +489,10 @@ plot_block <- function(term_q, prefix, lsd_pmeta_vec) {
     return(invisible(NULL))
   }
   
-  # heatmap matrix: signed -log10(p) * sign(NES) per dataset demenza
+  # heatmap matrix: signed -log10(p) * sign(NES) 
   mat <- -log10(p_mat_dem[sel, , drop=FALSE]) * sign(nes_mat_dem[sel, , drop=FALSE])
   
-  # ordina per significatività meta demenza
-  ord <- order(-log10(term_q[sel]), decreasing = TRUE)
+   ord <- order(-log10(term_q[sel]), decreasing = TRUE)
   mat <- mat[sel[ord], , drop=FALSE]
   
   pal <- make_div_breaks(mat, paletteLength = 50)
@@ -554,10 +549,10 @@ plot_block <- function(term_q, prefix, lsd_pmeta_vec) {
   invisible(list(shared=rownames(mat), top20=rownames(mat2)))
 }
 
-# GO-up LSD (da ego_up meta): confronta con demenza "opposta"
+# GO-up LSD (da ego_up meta)
 plot_block(q_dem_for_LSDup, "GOup_LSD_vs_DEMENTIA", lsd_up$pmeta)
 
-# GO-down LSD (da ego_down meta): confronta con demenza "opposta"
+# GO-down LSD (da ego_down meta)
 plot_block(q_dem_for_LSDdn, "GOdn_LSD_vs_DEMENTIA", lsd_dn$pmeta)
 
 message("DONE.")
@@ -597,10 +592,10 @@ fdr_bin3 <- function(fdr){
   b <- dplyr::case_when(
     fdr < 0.05 ~ "FDR < 0.05",
     fdr < 0.10 ~ "FDR < 0.10",
-    fdr < 0.15 ~ "FDR < 0.15",
-    TRUE       ~ "FDR ≥ 0.15"
+    fdr < 0.25 ~ "FDR < 0.25",
+    TRUE       ~ "FDR ≥ 0.25"
   )
-  factor(b, levels = c("FDR ≥ 0.15","FDR < 0.15","FDR < 0.10","FDR < 0.05"))
+  factor(b, levels = c("FDR ≥ 0.25","FDR < 0.25","FDR < 0.10","FDR < 0.05"))
 }
 
 
@@ -627,7 +622,16 @@ df_LSDdn_DEMup <- tibble(
   left_join(inv_cam, by = "Description") %>%
   filter(!is.na(FDR_LSD), !is.na(FDR_Dementia))
 
+df_LSDup_DEMdown<-df_LSDup_DEMdown[df_LSDup_DEMdown$FDR_Dementia<0.05 & df_LSDup_DEMdown$FDR_LSD<0.05,]
+df_LSDdn_DEMup<-df_LSDdn_DEMup[df_LSDdn_DEMup$FDR_Dementia<0.05 & df_LSDdn_DEMup$FDR_LSD<0.05,]
+
+#filter categories changing in vitro in the same direction as LSD invivo
+df_LSDup_DEMdown<-df_LSDup_DEMdown[which(df_LSDup_DEMdown$invitro_camera_Dir=="Up"),]
+df_LSDdn_DEMup<-df_LSDdn_DEMup[which(df_LSDdn_DEMup$invitro_camera_Dir=="Down"),]
+
 # save tables (useful for debugging / reporting)
+write.xlsx(df_LSDup_DEMdown, file = "Results/Figures/Table_LSDup_vs_DementiaDown_withInVitro.xlsx", row.names = FALSE)
+write.xlsx(df_LSDdn_DEMup,   file = "Results/Figures/Table_LSDdn_vs_DementiaUp_withInVitro.xlsx",   row.names = FALSE)
 write.csv(df_LSDup_DEMdown, file = "Results/Figures/Table_LSDup_vs_DementiaDown_withInVitro.csv", row.names = FALSE)
 write.csv(df_LSDdn_DEMup,   file = "Results/Figures/Table_LSDdn_vs_DementiaUp_withInVitro.csv",   row.names = FALSE)
 
@@ -669,9 +673,6 @@ all_plots <- function(df_dir,
     ) %>%
     filter(!is.na(x), !is.na(y))
   
-  if (nrow(df_plot) < 5) {
-    stop("Too few points after in vitro filtering.")
-  }
   
   df_filt <- df_plot %>%
     filter(FDR_LSD <= hard_thr,
@@ -740,8 +741,8 @@ all_plots <- function(df_dir,
     
     scale_fill_manual(
       values = c(
-        "FDR ≥ 0.15" = "white",
-        "FDR < 0.15" = "#FEE0D2",
+        "FDR ≥ 0.25" = "white",
+        "FDR < 0.25" = "#FEE0D2",
         "FDR < 0.10" = "#FC9272",
         "FDR < 0.05" = "#DE2D26"
       ),
@@ -785,7 +786,7 @@ all_plots <- function(df_dir,
 all_plots(
   df_LSDup_DEMdown,
   out_pdf  = "Summary_LSDup_vs_DementiaDown_colorInVitro_CAMERA_FDRbins.pdf",
-  invitro_fdr_thr = 0.15,
+  invitro_fdr_thr = 0.25,
   n_labels = 8,
   top_n_each = 120,
   hard_thr = 0.15
@@ -794,7 +795,7 @@ all_plots(
 all_plots(
   df_LSDdn_DEMup,
   out_pdf  = "Summary_LSDdn_vs_DementiaUp_colorInVitro_CAMERA_FDRbins.pdf",
-  invitro_fdr_thr = 0.15,
+  invitro_fdr_thr = 0.25,
   n_labels = 8,
   top_n_each = 120,
   hard_thr = 0.15
