@@ -55,7 +55,8 @@ rownames(allNES_mat)<-allpaths
 for(i in 1:length(gsea_GO)){
   allNES_mat[gsea_GO[[i]]$Description,i]<-gsea_GO[[i]]$NES
 }
-
+colnames(allNES_mat)<-names(gsea_GO)
+colnames(allp_mat)<-names(gsea_GO)
 
 ##############################
 #### paths in common across LSD datasets (Up)
@@ -165,6 +166,8 @@ dev.off()
 ############################
 ### LSD plots up
 ##############################
+colnames(allp_mat_LSD)<-c("50ug/kg", "100ug/kg", "200ug/kg", "500ug/kg", "Chronic")
+
 path_sel<-names(pup[which(pup<0.05)])
 
 toplot<- -log10(allp_mat_LSD[path_sel,])
@@ -202,6 +205,14 @@ df<-data.frame(logpLSD=-log10(unlist(pup_LSD[path_sel])),logpAging=-log10(unlist
 pdf("Results/Figures/GOup_LSDvsAging.pdf",7,7)
 ggplot(df, aes(x=logpLSD, y=logpAging, label=gsub("GO_", "", path)))+geom_point()+geom_label_repel(label.size = 0.15,max.overlaps =20)+theme_classic()
 dev.off()
+
+colnames(allNES_mat_sel)<-paste(colnames(allNES_mat_sel), "NES")
+colnames(allp_mat_sel)<-paste(colnames(allp_mat_sel), "p-value")
+colnames(allp_mat_LSD)<-paste(colnames(allp_mat_LSD), "p-value")
+all_stats_up<-cbind(pathway=path_sel, allNES_mat_sel[path_sel, ], allp_mat_sel[path_sel, ], allp_mat_LSD[path_sel,], 
+                 logFDRLSD=-log10(unlist(pup_LSD[path_sel])),logFDRAging=-log10(unlist(pup[path_sel])),
+                 path=path_sel)[order((-log10(unlist(pup_LSD[path_sel]))-log10(unlist(pup[path_sel]))),decreasing = T),]
+write.xlsx(all_stats_up, "results/GO_all_stats_up.xlsx")
 
 
 ##############################
@@ -400,6 +411,16 @@ df<-data.frame(logpLSD=-log10(unlist(pdn_LSD[path_sel])),logpAging=-log10(unlist
 pdf("Results/Figures/GOdn_LSDvsAging.pdf",7,7)
 ggplot(df, aes(x=logpLSD, y=logpAging, label=gsub("GO_", "", path)))+geom_point()+geom_label_repel(label.size = 0.15,max.overlaps =20)+theme_classic()
 dev.off()
+
+colnames(allp_mat_LSD)<-c("50ug/kg", "100ug/kg", "200ug/kg", "500ug/kg", "Chronic")
+colnames(allNES_mat_sel)<-paste(colnames(allNES_mat_sel), "NES")
+colnames(allp_mat_sel)<-paste(colnames(allp_mat_sel), "p-value")
+colnames(allp_mat_LSD)<-paste(colnames(allp_mat_LSD), "p-value")
+all_stats_dn<-cbind(pathway=path_sel, allNES_mat_sel[path_sel, ], allp_mat_sel[path_sel, ], allp_mat_LSD[path_sel,], 
+                    logFDRLSD=-log10(unlist(pdn_LSD[path_sel])),logFDRAging=-log10(unlist(pdn[path_sel])),
+                    path=path_sel)[order((-log10(unlist(pdn_LSD[path_sel]))-log10(unlist(pdn[path_sel]))),decreasing = T),]
+write.xlsx(all_stats_dn, "results/GO_all_stats_dn.xlsx")
+
 
 ##############################
 #### paths in common across invitro comparisons (Down)
