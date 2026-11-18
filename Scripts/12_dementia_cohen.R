@@ -726,6 +726,34 @@ type=type)
 library(openxlsx)
 write.xlsx(df_all, file="Results/dementia_p_all.xlsx")
 
+###dementia-opposition scores (APR) per intervention (Table S13)
+# APR = -log10(opposition p) - (-log10(concordance p)); infinite APRs are capped at +/-300
+# relative APR = APR / mean APR of the aging-reverting comparators (positive controls)
+cap_apr <- function(apr, p_opp, p_conc) ifelse(is.finite(apr), apr, 300 * sign(p_opp - p_conc))
+apr_up  <- cap_apr(df_all$pup_diff, df_all$pup_rev, df_all$pup_mimick)
+apr_dn  <- cap_apr(df_all$pdn_diff, df_all$pdn_rev, df_all$pdn_mimick)
+apr_avg <- (apr_up + apr_dn)/2
+is_pc   <- df_all$type == "Positive Control"
+type_label <- c("Psychoplastogen"="Psychoplastogen", "Positive Control"="Aging-Reverting Comparator",
+                "Negative Control"="Aging-Concordant Comparator")
+
+apr_table <- data.frame(
+  dataset = df_all$dataset,
+  "opposition p (-log10) -up-regulated genes"    = df_all$pup_rev,
+  "concordance p (-log10) -up-regulated genes"   = df_all$pup_mimick,
+  "opposition p (-log10) -down-regulated genes"  = df_all$pdn_rev,
+  "concordance p (-log10) -down-regulated genes" = df_all$pdn_mimick,
+  "APR (-log10) -up-regulated genes"   = apr_up,
+  "APR (-log10) -down-regulated genes" = apr_dn,
+  "average APR" = apr_avg,
+  type = unname(type_label[df_all$type]),
+  "APR / mean Aging-Reverting Comparators APR - up-regulated genes"   = apr_up/mean(apr_up[is_pc]),
+  "APR / mean Aging-Reverting Comparators APR - down-regulated genes" = apr_dn/mean(apr_dn[is_pc]),
+  "average APR fold" = apr_avg/mean(apr_avg[is_pc]),
+  check.names = FALSE
+)
+write.xlsx(apr_table, file="Results/dementia_opposition_scores.xlsx")
+
 
 df<-data.frame(pup=c(-log10(c(p_up_LSD$p, unlist(p_up_tot)))+log10(c(p_up_LSD_inv$p, unlist(p_up_tot_inv)))), 
                pdn=c(-log10(c(p_dn_LSD$p,unlist(p_dn_tot)))+log10(c(p_dn_LSD_inv$p, unlist(p_dn_tot_inv)))), dataset=dataset,
