@@ -725,19 +725,32 @@ all_plots <- function(df_dir,
       alpha = 0.95
     ) +
     
-    ggrepel::geom_label_repel(
+    ggrepel::geom_text_repel(
       data = lab,
-      aes(label = label),
-      size = 4,                # <- labels più grandi
+      aes(x = x, y = y, label = label),
+      size = 4.8,
+      fontface = "bold",
       min.segment.length = 0,
-      box.padding = 0.5,
-      point.padding = 0.35,
-      label.size = 0.4,
-      max.overlaps = n_labels,
-      force = 8,
-      force_pull = 0.8,
+      segment.size = 0.5,
+      segment.color = "black",
+      segment.alpha = 0.9,
+      
+      # più spazio
+      box.padding = 1.1,
+      point.padding = 1.1,
+      
+      # spingi le label fuori dall'area densa
+      direction = "y",
+      force = 25,
+      force_pull = 0.5,
+      
+      # aumenta iterazioni (più tempo, migliore layout)
+      max.time = 2,
+      max.iter = 5000,
+      
+      max.overlaps = Inf,
       seed = repel_seed
-    ) +
+    )+
     
     scale_fill_manual(
       values = c(
@@ -787,8 +800,8 @@ all_plots(
   df_LSDup_DEMdown,
   out_pdf  = "Summary_LSDup_vs_DementiaDown_colorInVitro_CAMERA_FDRbins.pdf",
   invitro_fdr_thr = 0.25,
-  n_labels = 8,
-  top_n_each = 120,
+  n_labels = 5,
+  top_n_each = 100,
   hard_thr = 0.15
 )
 
@@ -796,8 +809,8 @@ all_plots(
   df_LSDdn_DEMup,
   out_pdf  = "Summary_LSDdn_vs_DementiaUp_colorInVitro_CAMERA_FDRbins.pdf",
   invitro_fdr_thr = 0.25,
-  n_labels = 8,
-  top_n_each = 120,
+  n_labels = 5,
+  top_n_each = 100,
   hard_thr = 0.15
 )
 
