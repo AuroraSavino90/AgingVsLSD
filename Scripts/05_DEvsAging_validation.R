@@ -370,6 +370,7 @@ df_all$pdn_diff= -df$pdn+df_rev$pdn
 df_all[df_all=="-Inf"]<-(-300)
 df_all[df_all< (-300)]<-(-300)
 df_all[df_all=="Inf"]<-(300)
+df_all$average_APR <- (df_all$pup_diff + df_all$pdn_diff)/2
 
 library(openxlsx)
 write.xlsx(df_all, file="Results/invivo_metap_all.xlsx")
