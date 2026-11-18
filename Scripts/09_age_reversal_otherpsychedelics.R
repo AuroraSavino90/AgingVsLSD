@@ -593,6 +593,34 @@ df_all$pdn_diff= -df$pdn+df_rev$pdn
 library(openxlsx)
 write.xlsx(df_all, file="Results/age_reversal_p_all.xlsx")
 
+###aging-opposition scores (APR) per intervention (Table S7)
+# APR = -log10(opposition p) - (-log10(concordance p)); infinite APRs are capped at +/-300
+# relative APR = APR / mean APR of the aging-reverting comparators (positive controls)
+cap_apr <- function(apr, p_opp, p_conc) ifelse(is.finite(apr), apr, 300 * sign(p_opp - p_conc))
+apr_up  <- cap_apr(df_all$pup_diff, df_all$pup_rev, df_all$pup)
+apr_dn  <- cap_apr(df_all$pdn_diff, df_all$pdn_rev, df_all$pdn)
+apr_avg <- (apr_up + apr_dn)/2
+is_pc   <- df_all$type == "Positive Control"
+type_label <- c("Psychoplastogen"="Psychoplastogen", "Positive Control"="Aging-Reverting Comparator",
+                "Negative Control"="Aging-Concordant Comparator")
+
+apr_table <- data.frame(
+  dataset = df_all$dataset,
+  "opposition p (-log10) -up-regulated genes"    = df_all$pup_rev,
+  "opposition p (-log10) -down-regulated genes"  = df_all$pdn_rev,
+  "concordance p (-log10) -up-regulated genes"   = df_all$pup,
+  "concordance p (-log10) -down-regulated genes" = df_all$pdn,
+  "APR (-log10) -up-regulated genes"   = apr_up,
+  "APR (-log10) -down-regulated genes" = apr_dn,
+  "average APR" = apr_avg,
+  type = unname(type_label[df_all$type]),
+  "APR / mean Aging-Reverting Comparators APR - up-regulated genes"   = apr_up/mean(apr_up[is_pc]),
+  "APR / mean Aging-Reverting Comparators APR - down-regulated genes" = apr_dn/mean(apr_dn[is_pc]),
+  "average APR fold" = apr_avg/mean(apr_avg[is_pc]),
+  check.names = FALSE
+)
+write.xlsx(apr_table, file="Results/aging_opposition_scores.xlsx")
+
 df<-data.frame(pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=dataset,
                type=type)
 df[df=="-Inf"]<-(-300)
