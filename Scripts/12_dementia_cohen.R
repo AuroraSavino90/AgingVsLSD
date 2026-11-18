@@ -705,15 +705,15 @@ ggplot(df, aes(x=pup, y=pdn, label=dataset))+geom_point()+geom_label_repel()+
 
 
 
-dataset<-c("MDMA", "Ketamine (long term)", "DOI (2h)", 
+dataset<-c("LSD (chronic)", "MDMA", "Ketamine (long term)", "DOI (2h)", 
            "LSD (single)", "Exercise (28d)", "Alcohol (vapour chamber)", "Alcohol (vapour chamber 2)", "Alcohol (IP injection)",
            "DMT", "DOI (24h)", "DOI (48h)", "DOI (7days)",
            "Psilocybin (3h)", "Psilocybin (4weeks)", "Ketamine (single)",
-           "Harmaline", "Pharmahuasca", "Exercise (30d)","EE (Young)", "EE (Old)", 
-           "LSD (chronic)")
+           "Harmaline", "Pharmahuasca", "Exercise (30d)","EE (Young)", "EE (Old)"
+           )
 type<-rep("Psychoplastogen", length(dataset))
-type[c(5, 18:20)]<-"Positive Control"
-type[c(6,7,8)]<-"Negative Control"
+type[c(6, 19:21)]<-"Positive Control"
+type[c(7,8,9)]<-"Negative Control"
 
 df_all<-data.frame(pup_rev= -log10(c(p_up_LSD$p,unlist(p_up_tot))),
                    pup_mimick= -log10(c(p_up_LSD_inv$p, unlist(p_up_tot_inv))),
@@ -745,8 +745,8 @@ dev.off()
 
 DE_annot <- data.table(
   DE        = names(p_up_list),
-  DE_label  = dataset[c(21, 1:20)],
-  DE_type   = type[c(21, 1:20)]
+  DE_label  = dataset,
+  DE_type   = type
 )
 library(data.table)
 
@@ -826,4 +826,51 @@ final_table$p_1t_inv[ok_inv] <- metap::two2one(
 final_table$DE<-gsub("DE_", "", final_table$DE)
 
 write.xlsx(final_table, file="Results/all_GSEA_dementia.xlsx")
+
+
+###table of all dementia tests (Table S12), input of 21_cohen_figures.R
+# Cohen's d above is computed as (Healthy - Dementia); here it is reported as
+# (Dementia - Healthy), so that d > 0 means higher gene-set activity in dementia.
+# p-values are unchanged: inverted_1t / p_1t are the dementia-reversal tests,
+# inverted_1t_inv / p_1t_inv the dementia-mimicking tests.
+
+dementia_tests <- data.frame(
+  intervention_dataset   = final_table$DE,
+  intervention_condition = final_table$DE_label,
+  intervention_type      = final_table$DE_type,
+  dementia_dataset       = final_table$dataset_id,
+  dementia_condition     = final_table$condition,
+  direction              = final_table$direction,
+  pvalue                 = final_table$pvalue,
+  cohen                  = -final_table$cohen,
+  invert_rev             = final_table$inverted_1t,
+  invert_mimick          = final_table$inverted_1t_inv,
+  p_onetail_rev          = final_table$p_1t,
+  p_onetail_mimick       = final_table$p_1t_inv
+)
+
+dementia_tests_desc <- data.frame(
+  Column = colnames(dementia_tests),
+  Description = c(
+    "GEO ID (where available) of the intervention dataset used to define differentially expressed genes (DEGs)",
+    "description of the intervention",
+    "type of intervention: Psychoplastogen, Positive Control, Negative Control",
+    "GEO ID of the dementia dataset used to test differences in intervention DEGs signatures",
+    "Condition and brain area analysed",
+    "direction of differentially expressed genes. UP= up with intervention; DN= down with intervention",
+    "t-test p-value",
+    "Cohen's d (dementia vs healthy) of the ssGSEA scores of the intervention DEGs",
+    "whether the p-value was inverted or not to compute the one-tailed dementia reversal p-value",
+    "whether the p-value was inverted or not to compute the one-tailed dementia mimicking p-value",
+    "one-tail p-value for dementia reversal",
+    "one-tail p-value for dementia mimicking"
+  )
+)
+
+wb_dem <- createWorkbook()
+addWorksheet(wb_dem, "Column description")
+writeData(wb_dem, "Column description", dementia_tests_desc)
+addWorksheet(wb_dem, "Full test results")
+writeData(wb_dem, "Full test results", dementia_tests)
+saveWorkbook(wb_dem, "Results/dementia_cohen_all_tests.xlsx", overwrite = TRUE)
 
