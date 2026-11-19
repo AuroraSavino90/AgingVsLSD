@@ -735,16 +735,16 @@ all_plots <- function(df_dir,
       segment.color = "black",
       segment.alpha = 0.9,
       
-      # più spazio
+      # more spacing
       box.padding = 1.1,
       point.padding = 1.1,
       
-      # spingi le label fuori dall'area densa
+      # push labels out of the dense area
       direction = "y",
       force = 25,
       force_pull = 0.5,
       
-      # aumenta iterazioni (più tempo, migliore layout)
+      # more iterations (slower, better layout)
       max.time = 2,
       max.iter = 5000,
       
@@ -762,21 +762,21 @@ all_plots <- function(df_dir,
       name = "In vitro (CAMERA)\nFDR"
     ) +
     
-    theme_classic(base_size = 16) +   # <- base più grande
+    theme_classic(base_size = 16) +   # <- larger base font size
     
     theme(
       legend.position = "bottom",
       legend.box = "horizontal",
       
-      # 🔹 rimuove completamente titolo e sottotitolo
+      # remove title and subtitle
       plot.title = element_blank(),
       plot.subtitle = element_blank(),
       
-      # 🔹 assi più grandi
+      # larger axis text
       axis.title = element_text(size = 14, face = "bold"),
       axis.text  = element_text(size = 14),
       
-      # 🔹 legend più leggibile
+      # more readable legend
       legend.title = element_text(size = 14),
       legend.text  = element_text(size = 14)
     ) +

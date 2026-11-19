@@ -23,13 +23,6 @@ GTEx_PFC<-t(t(GTEx_PFC)/colSums(GTEx_PFC))*1000000
 GTEx_PFC<-log2(GTEx_PFC+1)
 
 #####metadata
-#TODO mostrare che la distribuzione delle corr è skewed verso valori negativi,
-#che i geni MT sono altamente espressi (fino al 65% dei reads)
-#che i geni MT correlano con l'età
-#che i geni MT sono alti dove i geni negativamente correlati sono bassi (esempio NMU)
-#che i geni negativamente correlati con l'età sono espressi a bassi livelli dove sono alti gli MT
-#ragionevole ipotizzare un bias dovuto alla normalizzazione, su cui influiscono moltissimo i valori molto alti degli MT
-#eliminando i campioni con altissimi MT si riduce il problema iniziale
 
 subj <- fread('https://storage.googleapis.com/adult-gtex/annotations/v8/metadata-files/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt')
 samp <- fread('https://storage.googleapis.com/adult-gtex/annotations/v8/metadata-files/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt')

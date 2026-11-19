@@ -244,7 +244,7 @@ cols <- c(
 df$Trt <- factor(df$Trt, levels = c("Ct", "LSD", "Abeta", "Abeta + LSD"))
 
 p_main <- ggplot(df, aes(PC1, PC2, colour = Trt, fill = Trt)) +
-  geom_point(size = 3) +   # ⬅️ rimosso alpha
+  geom_point(size = 3) +   # alpha removed
   geom_xsidedensity(alpha = 0.25, linewidth = 0.4) +
   geom_ysidedensity(alpha = 0.25, linewidth = 0.4) +
   scale_colour_manual(values = cols, drop = FALSE) +
@@ -265,7 +265,7 @@ p_main <- ggplot(df, aes(PC1, PC2, colour = Trt, fill = Trt)) +
   )
 
 
-# -------- plot solo per estrarre legenda
+# -------- plot used only to extract the legend
 p_leg <- ggplot(df, aes(PC1, PC2, colour = Trt, fill = Trt)) +
   geom_point(size = 3) +
   scale_colour_manual(values = cols, drop = FALSE) +
@@ -275,7 +275,7 @@ p_leg <- ggplot(df, aes(PC1, PC2, colour = Trt, fill = Trt)) +
 
 legend <- get_legend(p_leg)
 
-# -------- composizione finale
+# -------- final composition
 pdf("results/Figures/invitro_Abeta_revert_sep_PCA12_005.pdf", width = 7.5, height = 6)
 
 plot_grid(

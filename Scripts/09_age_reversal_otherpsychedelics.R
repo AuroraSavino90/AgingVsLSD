@@ -681,7 +681,7 @@ dt_last <- rbindlist(
 setcolorder(dt_last, c( "aging_dataset", "DE", "dataset", setdiff(names(dt_DE), c("DE", "dataset",  "aging_dataset"))))
 all_res[["DE_GSE179379"]] <- dt_last
 
-# tabella finale con TUTTI i DE
+# final table with ALL the DE results
 gsea_table <- rbindlist(all_res, use.names = TRUE, fill = TRUE)
 gsea_table<-gsea_table[,c("aging_dataset", "DE",            "dataset",       "pathway",          "padj",         
                           "NES" ,          "size" ,         "leadingEdge" ,  "type")]
@@ -693,7 +693,7 @@ gsea_table$dataset<-gsub("DE_", "", gsea_table$dataset)
 
 setDT(gsea_table)
 
-# Definizione invert come prima
+# define invert as above
 gsea_table[, invert_mimick := fifelse(
   direction == "DN", sign(NES) ==  1,
   fifelse(direction == "UP", sign(NES) == -1, NA)
@@ -704,11 +704,11 @@ gsea_table[, invert_rev := fifelse(
   fifelse(direction == "UP", sign(NES) ==  1, NA)
 )]
 
-# Creo colonne vuote
+# create empty columns
 gsea_table[, p_two2one_meta := NA_real_]
 gsea_table[, p_two2one_rev  := NA_real_]
 
-# Indici validi (p dentro (0,1] e invert non NA)
+# valid indices (p in (0,1] and invert not NA)
 valid_mimick <- which(
   !is.na(gsea_table$padj) &
     gsea_table$padj > 0 &
@@ -723,7 +723,7 @@ valid_rev <- which(
     !is.na(gsea_table$invert_rev)
 )
 
-# Applico two2one solo ai validi
+# apply two2one to valid entries only
 gsea_table$p_two2one_meta[valid_mimick] <-
   metap::two2one(
     gsea_table$padj[valid_mimick],

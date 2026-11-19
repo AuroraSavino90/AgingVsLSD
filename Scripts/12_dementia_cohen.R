@@ -816,7 +816,6 @@ library(metap)
 
 setDT(final_table)
 
-# usa pvalue o padj (scegline uno)
 p <- as.numeric(final_table$pvalue)   
 
 inv_std <- fifelse(
