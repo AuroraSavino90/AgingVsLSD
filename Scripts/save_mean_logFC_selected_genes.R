@@ -1,3 +1,4 @@
+suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 # ============================================================
 # Mean intervention logFC of the selected UP/DN genes (Table S8)
 # and of the genes changing in the same / opposite direction
@@ -8,6 +9,7 @@
 
 rm(list = ls())
 setwd("workdir")  # change if needed
+# Published results (Tables S8/S10): org.Rn.eg.db 3.22.0.
 
 suppressPackageStartupMessages({
   library(data.table)
