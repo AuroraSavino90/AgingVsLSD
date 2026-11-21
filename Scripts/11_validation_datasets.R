@@ -1,16 +1,28 @@
+suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 
 library(GEOquery)
 library(ggplot2)
 source("Scripts/utilities.R")
 options(timeout = 5000)
 
+# GEO data are read from the local files in Data/ (no connection to NCBI):
+# series matrix + platform annotation table, which is what getGEO(..., AnnotGPL = TRUE)
+# returns as fData (GPL6947.annot.gz for GSE36192, GPL5175.soft.gz for GSE25219).
+read_gse_local <- function(series_file, gpl_file) {
+  eset <- getGEO(filename = series_file, getGPL = FALSE)
+  tab  <- Table(getGEO(filename = gpl_file))
+  fData(eset) <- tab[match(featureNames(eset), tab$ID), , drop = FALSE]
+  eset
+}
+
 ################################
 ##########GSE36192
 ###############################
 
-gds<-getGEO("GSE36192",destdir="Data/", AnnotGPL = TRUE)
+gds <- list(GSE36192_series_matrix.txt.gz = read_gse_local("Data/GSE36192_series_matrix.txt.gz", "Data/GPL6947.annot.gz"))
 
 GSE36192<-exprs(gds$GSE36192_series_matrix.txt.gz)
 GSE36192_meta<-pData(gds$GSE36192_series_matrix.txt.gz)
@@ -23,7 +35,7 @@ GSE36192<-log2(GSE36192)
 ##########GSE25219
 ###############################
 
-gds<-getGEO("GSE25219",destdir="Data/", AnnotGPL = TRUE)
+gds <- list(`GSE25219-GPL5175_series_matrix.txt.gz` = read_gse_local("Data/GSE25219-GPL5175_series_matrix.txt.gz", "Data/GPL5175.soft.gz"))
 
 GSE25219<-exprs(gds$`GSE25219-GPL5175_series_matrix.txt.gz`)
 GSE25219_meta<-pData(gds$`GSE25219-GPL5175_series_matrix.txt.gz`)
