@@ -7,11 +7,12 @@ library(data.table)
 GTEx_PFC <- fread('Data/gene_reads_2017-06-05_v8_brain_frontal_cortex_ba9.gct.gz',data.table=FALSE)
 rownames(GTEx_PFC)<-GTEx_PFC[,2]
 
-library("biomaRt")
-ensembl = useMart(biomart="ensembl", dataset="hsapiens_gene_ensembl",host="https://useast.ensembl.org")
-genes_conv<-getBM(attributes = c('ensembl_gene_id','hgnc_symbol'),
-                  values = gsub("\\..*","",rownames(GTEx_PFC)), 
-                  mart = ensembl)
+# Ensembl 115 instead of live biomaRt: the published Fig S16 was made on 1 Oct 2025 with the live
+# Ensembl site, then release 115 (with 115 the histograms of S16A/E are identical to the published ones).
+# This script only makes Fig S16: the GTEx_PFC used in the analyses (Alldata_20Sep) is built in
+# Scripts/data_preparation with Ensembl 107, as in 2022.
+source("Scripts/data_preparation/ensembl_release_map.R")
+genes_conv <- ensembl_release_map(115, "hsapiens", "Data/ensembl")
 
 metadata<-read.csv('Data/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt', sep="\t")
 symbol<-genes_conv[match(gsub("\\..*","",rownames(GTEx_PFC)), genes_conv[,1]),2]
@@ -24,8 +25,9 @@ GTEx_PFC<-log2(GTEx_PFC+1)
 
 #####metadata
 
-subj <- fread('https://storage.googleapis.com/adult-gtex/annotations/v8/metadata-files/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt')
-samp <- fread('https://storage.googleapis.com/adult-gtex/annotations/v8/metadata-files/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt')
+gtex_url <- 'https://storage.googleapis.com/adult-gtex/annotations/v8/metadata-files/'  # local copies in Data/ are read when present
+subj <- fread(if (file.exists('Data/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt')) 'Data/GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt' else paste0(gtex_url, 'GTEx_Analysis_v8_Annotations_SubjectPhenotypesDS.txt'))
+samp <- fread(if (file.exists('Data/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt')) 'Data/GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt' else paste0(gtex_url, 'GTEx_Analysis_v8_Annotations_SampleAttributesDS.txt'))
 
 samp[, SUBJID := gsub('([^-]*)-([^-]*)-.*', '\\1-\\2', SAMPID)]
 
