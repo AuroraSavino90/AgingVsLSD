@@ -1,9 +1,12 @@
+suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 library(fgsea)
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
 load("Data/Alldata_20Sep.RData")
+set.seed(1234)  # fixed seed for the CMap GSEA (Fig 1C-D, Figs S7-S8);
 homologs<-read.csv("Data/Human rat homologs.txt")
 #######################
 ### random drugs
