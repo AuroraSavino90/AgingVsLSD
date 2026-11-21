@@ -1,19 +1,22 @@
 rm(list=ls())
 setwd("workdir")#workdir = working directory
-library(biomaRt)
+# Published results: Bioconductor 3.21 annotations (org.Mm.eg.db, GO.db 3.21.0) and Ensembl 115.
+set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 library(openxlsx)
 library(ggplot2)
 library(DESeq2)
-library(FactoMineR)
 
 source("Scripts/utilities.R")
 
-meta<-read.xlsx("Data/Samples.xlsx",1)
+# 15 samples deposited in GEO (GSE263662): cohorts C1-C3, one mouse per dose (0, 50, 100, 200, 500 ug/kg) per cohort
+meta<-read.xlsx("Data/Samples_LSD.xlsx",1)
 meta$dose[meta$dose=="ctrl"]<-0
 
-#load counts
+#load counts (two lanes per sample, files ordered as the samples in meta)
 filesL1<-list.files("Data/Counts", pattern="L001")
 filesL2<-list.files("Data/Counts",pattern="L002")
+filesL1<-filesL1[match(paste0("_S", meta$sample, "_"), regmatches(filesL1, regexpr("_S[0-9]+_", filesL1)))]
+filesL2<-filesL2[match(paste0("_S", meta$sample, "_"), regmatches(filesL2, regexpr("_S[0-9]+_", filesL2)))]
 L1mat<-read.csv(paste("Data/Counts", filesL1[1], sep="/"), sep="\t")
 for(i in filesL1){
   L1mat<-cbind(L1mat, read.csv(paste("Data/Counts", i, sep="/"), sep="\t")[,2])
@@ -30,42 +33,23 @@ L2mat<-L2mat[,-c(1,2)]
 counts<-L1mat+L2mat
 
 #convert to gene symbol
-ensembl.mouse<- useEnsembl(biomart = "genes", dataset = "mmusculus_gene_ensembl")
-ids<-getBM(attributes = c('ensembl_gene_id', 'mgi_symbol'),
-           filters = 'ensembl_gene_id',
-           values = rownames(counts),
-           mart = ensembl.mouse)
+# Ensembl 115 (the live release in Sep 2025) instead of live biomaRt
+source("Scripts/data_preparation/ensembl_release_map.R")
+ids <- ensembl_release_map(115, "mmusculus", "Data/ensembl")
+ids <- ids[ids$ensembl_gene_id %in% rownames(counts), ]
 counts_mgi<-changenames(data=counts, anno=ids)
 
-#filter genes with a minimum number of counts per sample
+#filter genes with at least 10 reads in at least 3 samples
 counts_mgi_filt<-counts_mgi[rowSums(counts_mgi>=10)>=3,]
 
-#normalize (RPM)
+#remove genes with variance < 0.5 after normalisation as reads per million (RPM)
 RPM<-t(t(counts_mgi_filt)/colSums(counts_mgi_filt))*1000000
-RPM_log<-log2(RPM+1)
+vargenes<-apply(RPM,1, var)
+counts_mgi_filt<-counts_mgi_filt[which(vargenes>0.5),]
 
-
-###only first 3 cohorts
-counts_mgi_filt1<-counts_mgi[,which(meta$cohort %in% c("C1", "C2", "C3"))]
-counts_mgi_filt1<-counts_mgi_filt1[rowSums(counts_mgi_filt1>=10)>=3,]
-
-RPM1<-t(t(counts_mgi_filt1)/colSums(counts_mgi_filt1))*1000000
-vargenes<-apply(RPM1,1, var)
-RPM1<-RPM1[which(vargenes>0.5),]
-
-RPM_log1<-log2(RPM1+1)
-
-meta_filt1<-meta[which(meta$cohort %in% c("C1", "C2", "C3")),]
-
-pca<-PCA(t(RPM_log1))
-df<-data.frame(PC1=pca$ind$coord[,1], PC2=pca$ind$coord[,2], PC3=pca$ind$coord[,3], PC4=pca$ind$coord[,4], PC5=pca$ind$coord[,5],meta_filt1)
-
-ggplot(df, aes(x=PC1, y=PC2, colour=as.numeric(dose)))+geom_point(size=3)+scale_color_gradient(low = "blue", high = "red")
-ggplot(df, aes(x=PC3, y=PC4, colour=daytime))+geom_point(size=3)
-ggplot(df, aes(x=PC1, y=PC2, colour=growth))+geom_point()
-
-dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts_mgi_filt1[rownames(RPM_log1),],
-                                      colData = data.frame(meta_filt1),
+#differential expression vs saline, adjusting for cohort
+dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts_mgi_filt,
+                                      colData = data.frame(meta),
                                       design= ~ dose+cohort)
 dds <- DESeq2::DESeq(dds)
 DE_500 <- DESeq2::results(dds, contrast = c("dose", "500", "0"))
@@ -78,6 +62,7 @@ library(fgsea)
 library(ggrepel)
 
 load("Data/Alldata_20Sep.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Alldata_20Sep.RData), set explicitly
 rat_homologs<-read.csv("Data/Human rat homologs.txt", sep="\t")
 mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 
