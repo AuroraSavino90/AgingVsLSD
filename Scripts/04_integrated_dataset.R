@@ -1,9 +1,12 @@
+suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
 load("Data/Alldata_20Sep.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Alldata_20Sep.RData), set explicitly
 homologs<-read.csv("Data/Human rat homologs.txt")
 
 region<-c("DLPFC")
@@ -96,7 +99,7 @@ batch = dataset_all
 library(sva)
 mod = model.matrix(~age_all, data=data.frame(alldata))
 mod0 = model.matrix(~1,data=data.frame(t(alldata)))
-n.sv = num.sv(data.frame(alldata),mod,method="leek")
+n.sv = 8  # the published alldata_resid used 8 SVs (num.sv(..., method="leek") now returns 28)
 svobj = sva(as.matrix(alldata),mod,mod0,n.sv=n.sv)
 plot(age_all, svobj[[1]][,1], col=as.factor(dataset_all))
 plot(age_all, svobj[[1]][,2], col=as.factor(dataset_all))
