@@ -1,7 +1,11 @@
+library(metap)  
+suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 
 load("Data/Alldata_20Sep.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Alldata_20Sep.RData), set explicitly
 signature<-read.csv("Data/ACEL-17-e12819-s002.csv")
 signature_up<-signature$Gene.Symbol[signature$Microarray=="up"]
 signature_dn<-signature$Gene.Symbol[signature$Microarray=="down"]
