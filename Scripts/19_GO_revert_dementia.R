@@ -1,21 +1,20 @@
+suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 rm(list=ls())
 setwd("workdir") 
+# Published results: dementia gseGO with Bioconductor 3.22 annotations (org.Hs.eg.db, GO.db 3.22.0);
+# chronic-LSD enrichGO as in 18_GO_allLSD.R (Bioconductor 3.21). See README.md, "R environments".
+set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 
 
 dir.create("Results", showWarnings = FALSE, recursive = TRUE)
 dir.create("Results/RData", showWarnings = FALSE, recursive = TRUE)
 dir.create("Results/Figures", showWarnings = FALSE, recursive = TRUE)
 
-# -----------------------------
-# LOAD
-# -----------------------------
-load("Data/Psychedelics_PFC.RData")
-load("Data/Alldata_20Sep.RData")
-load("Data/ExerciseAndAlcohol.RData")
-load("Data/Dementia_alldata_meta.RData")
-load("Results/RData/DE_GSE179379.RData")
-homologs <- read.csv("Data/Human rat homologs.txt")
-
+# Packages are attached BEFORE the load() calls: attaching clusterProfiler draws one
+# random number, and load("Data/Dementia_alldata_meta.RData") restores the random
+# state saved in that file, which the dementia gseGO below must start from
+# (published Tables S19-S21). Table S21 also needs org.Mm.eg.db 3.21.0
+# (see README.md, "R environments").
 suppressPackageStartupMessages({
   library(clusterProfiler)
   library(org.Hs.eg.db)
@@ -24,6 +23,26 @@ suppressPackageStartupMessages({
   library(ggplot2)
   library(ggrepel)
 })
+
+# -----------------------------
+# LOAD
+# -----------------------------
+load("Data/Psychedelics_PFC.RData")
+load("Data/Alldata_20Sep.RData")
+load("Data/ExerciseAndAlcohol.RData")
+load("Data/Dementia_alldata_meta.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Dementia_alldata_meta.RData), set explicitly
+# clusterProfiler keeps its annotation caches in .GlobalEnv and reuses them instead of org.Rn.eg.db
+# and GO.db: .GO_clusterProfiler_Env (rat gene-GO table, SYMBOL, BP), .GOTERM_Env (GO term table)
+# and .Anno_clusterProfiler_Env. The original Data/ExerciseAndAlcohol.RData workspace (saved
+# 21/09/2022) contained all three, so the published chronic-LSD enrichGO below (Tables S19-S21,
+# Figs 3J-K and S12) used the 2022 annotations. The rebuilt RData contain only data: the three
+# caches are restored here (Data/clusterProfiler_cache_2022.rds, extracted from that workspace).
+local({ cache <- readRDS("Data/clusterProfiler_cache_2022.rds")
+  for (en in names(cache)) { env <- new.env(); for (n in names(cache[[en]])) assign(n, cache[[en]][[n]], envir = env)
+    assign(en, env, envir = .GlobalEnv) } })
+load("Results/RData/DE_GSE179379.RData")
+homologs <- read.csv("Data/Human rat homologs.txt")
 
 # -----------------------------
 # Helpers

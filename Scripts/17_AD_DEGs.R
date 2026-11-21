@@ -1,3 +1,5 @@
+set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
+library(ggplot2)  # missing in the GitHub script
 library(metap)
 library(limma)
 library(clusterProfiler)
@@ -12,6 +14,7 @@ Abeta_genes_dn<-unique(mouse_homologs[which(mouse_homologs[,2] %in% Abeta_genes_
 
 
 load("Data/Dementia_alldata_meta.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Dementia_alldata_meta.RData), set explicitly
 
 region<-"DLPFC"
 diagnosis<-c("Healthy", "Alzheimer")
