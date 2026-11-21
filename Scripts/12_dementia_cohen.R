@@ -1,3 +1,5 @@
+library(data.table)  # data.table() used without loading data.table
+suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 rm(list=ls())
 setwd("workdir")#workdir = working directory
 
@@ -248,7 +250,7 @@ mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
 mouse_data<-c("DE_GSE64607","DE_GSE164798_chronic", "DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626",
               "DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",
               "DE_GSE209859_FC3hours", "DE_GSE209859_FC4weeks",
-              "DE_GSE105453_Y", "DE_GSE105453_O", "DE_GSE111273_Y", "DE_GSE111273_O")
+              "DE_GSE111273_Y", "DE_GSE111273_O")
 rat_data<-c("DE_GSE14720", "DE_GSE23728","DE_GSE179380","DE_DMT", "DE_pharm", "DE_harm")
 ##MDMA
 DEGs_array<-c("DE_MDMA",
