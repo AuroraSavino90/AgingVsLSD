@@ -1,5 +1,8 @@
+library(openxlsx)  # write.xlsx used without loading openxlsx
+suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+# Published results: Bioconductor 3.21 annotations (org.Rn.eg.db and GO.db 3.21.0).
 
 load("Results/RData/DE_GSE179379.RData")
 load("Data/Alldata_20Sep.RData")
@@ -482,17 +485,11 @@ dev.off()
 load(file="Results/genes_cor.RData")
 
 library(msigdbr)
-library(biomaRt)
 library(fgsea)
 
 m_df = msigdbr(species = "Homo sapiens", category = "C5") #Gets the list of functional categories.
 m_list = m_df %>% split(x = .$gene_symbol, f = .$gs_name)
 
-mart <- useMart(biomart = "ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl") 
-go_list <- getBM(attributes=c("go_id", "hgnc_symbol"),
-                 filters = "go",
-                 values = c("GO:0050803"),
-                 mart=mart)
 
 #"GOBP_REGULATION_OF_SYNAPSE_STRUCTURE_OR_ACTIVITY"
 genes_go<-unique(m_list["GOBP_DENDRITIC_SPINE_DEVELOPMENT"])
