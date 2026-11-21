@@ -1,5 +1,6 @@
 rm(list=ls())
 setwd("workdir")#workdir = working directory
+set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 ################################
 ####### gsea lsd vs aging
 ###############################
@@ -10,6 +11,7 @@ library(ggrepel)
 load("Data/ExerciseAndAlcohol.RData")
 load("Data/Psychedelics_PFC.RData")
 load("Data/Alldata_20Sep.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Alldata_20Sep.RData), set explicitly
 source("Scripts/utilities.R")
 rat_homologs<-read.csv("Data/Human rat homologs.txt")
 mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
@@ -463,13 +465,10 @@ for(dd in dat){
 ####define DEGs in rats aging
 GSE75772<-read.csv("Data/GSE75772_DEseq-normalized.counts_mPFC.csv.gz", row.names = 1)
 
-library(biomaRt)
-ensembl.rat <- useMart("ensembl", dataset = "rnorvegicus_gene_ensembl")
-
-ids<-getBM(attributes = c('ensembl_gene_id', 'rgd_symbol'),
-           filters = 'ensembl_gene_id',
-           values = rownames(GSE75772),
-           mart = ensembl.rat)
+# Ensembl release pinned (original: live Ensembl in Sep 2025 = release 114/115, identical for these IDs)
+source("Scripts/data_preparation/ensembl_release_map.R")
+ids <- ensembl_release_map(115, "rnorvegicus", "Data/ensembl")
+ids <- ids[ids$ensembl_gene_id %in% rownames(GSE75772), ]
 
 
 GSE75772<-changenames(data=GSE75772, anno=ids)
@@ -492,6 +491,11 @@ genes_dn<-rownames(DE)[which(DE$logFC<0 & DE$P.Value<0.05)]
 genes_up<-unique(homologs[which(homologs[,2] %in% genes_up),3])
 genes_dn<-unique(homologs[which(homologs[,2] %in% genes_dn),3])
 
+# rat aging (GSE75772) GSEA: the published values (Tables S4, S7, Fig 1E) come from an earlier run
+# (September 2025) that started from the random state saved in Data/Alldata_20Sep.RData advanced by
+# 1559 uniform draws (found by search, see README.md, "Random numbers"). The GSEA of the other interventions
+# above keep the state set after load().
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv); invisible(runif(1559))
 genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
 fgsea_res<-list()
 p<-list()
