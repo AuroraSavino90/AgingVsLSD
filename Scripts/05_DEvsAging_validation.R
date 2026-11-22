@@ -63,8 +63,8 @@ library(ggrepel)
 
 load("Data/original_RData_notclosed/Alldata_20Sep.RData")
 assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
-rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt", sep="\t")
-mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
+rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt", sep="\t")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
+mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")  # Ensembl 107: BioMart export, human genes (GRCh38.p13) with mouse homologs, August 2022
 
 library(metap)
 

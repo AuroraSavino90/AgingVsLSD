@@ -52,7 +52,7 @@ GSE25219<-changenames(data=GSE25219, anno=cbind(GSE25219_anno$ID, symbols))
 library(fgsea)
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]

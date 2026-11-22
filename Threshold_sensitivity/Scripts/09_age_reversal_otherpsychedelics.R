@@ -21,8 +21,8 @@ load("Data/original_RData/Psychedelics_PFC.RData")
 load("Data/original_RData/Alldata_20Sep.RData")
 assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData/Alldata_20Sep.RData), set explicitly as in Scripts/09_age_reversal_otherpsychedelics.R
 source("Scripts/utilities.R")
-rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt")
-mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
+rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
+mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")  # Ensembl 107: BioMart export, human genes (GRCh38.p13) with mouse homologs, August 2022
 
 mouse_data<-c("DE_GSE64607","DE_GSE164798_chronic", "DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626",
               "DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",

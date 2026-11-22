@@ -42,7 +42,7 @@ local({ cache <- readRDS("Data/original_RData_notclosed/clusterProfiler_cache_20
   for (en in names(cache)) { env <- new.env(); for (n in names(cache[[en]])) assign(n, cache[[en]][[n]], envir = env)
     assign(en, env, envir = .GlobalEnv) } })
 load("Results/RData/DE_GSE179379.RData")
-homologs <- read.csv("Data/homologs/Human rat homologs.txt")
+homologs <- read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 
 # -----------------------------
 # Helpers

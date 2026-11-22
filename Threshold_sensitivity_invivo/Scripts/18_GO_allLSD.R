@@ -13,7 +13,7 @@ source("Threshold_sensitivity_invivo/Scripts/invivo_setup.R")  # SELECTION_MODE,
 
 load("Data/intermediate_RData/DE_GSE179379.RData")
 load("Data/original_RData/Alldata_20Sep.RData")
-homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 load(file.path(OUT, "RData/ego_up_valid.RData"))
 load(file.path(OUT, "RData/ego_down_valid.RData"))
 

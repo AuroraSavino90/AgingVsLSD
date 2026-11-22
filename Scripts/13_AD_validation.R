@@ -6,7 +6,7 @@ set.seed(1234)  # fixed seed; where a random state is set after load() below, th
 load("Results/RData/DE_GSE179379.RData")
 load("Data/original_RData_notclosed/Alldata_20Sep.RData")
 assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
-homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 
 
 library(GEOquery)
@@ -84,7 +84,7 @@ cor_age<-cor(t(MSBB_sel), as.numeric(age))
 library(fgsea)
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]
@@ -133,7 +133,7 @@ save(cor_age, cor_braak, file="Results/RData/MSBB_gene_correlations.RData")  # g
 library(fgsea)
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]

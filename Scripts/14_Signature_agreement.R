@@ -13,7 +13,7 @@ signature_dn<-signature$Gene.Symbol[signature$Microarray=="down"]
 
 ##################################
 load("Results/RData/DE_GSE179379.RData")
-homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 load("Results/RData/fgsea_res.RData")
 
 fgsea_rank<-lapply(fgsea_res, function(x){-log10(x[1,3])*sign(x[1,6])+log10(x[2,3])*sign(x[2,6])})

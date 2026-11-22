@@ -7,7 +7,7 @@ library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
 load("Data/original_RData_notclosed/Alldata_20Sep.RData")
 assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
-homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 
 region<-c("DLPFC")
 diagnosis<-"Healthy"

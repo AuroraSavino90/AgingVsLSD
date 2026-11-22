@@ -7,7 +7,7 @@ library(fgsea)
 Abeta_genes_up<-read.csv(file="results/Abeta_genes_up_005.csv")[,2]
 Abeta_genes_dn<-read.csv(file="results/Abeta_genes_dn_005.csv")[,2]
 
-mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
+mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")  # Ensembl 107: BioMart export, human genes (GRCh38.p13) with mouse homologs, August 2022
 Abeta_genes_up<-unique(mouse_homologs[which(mouse_homologs[,2] %in% Abeta_genes_up),3])
 Abeta_genes_dn<-unique(mouse_homologs[which(mouse_homologs[,2] %in% Abeta_genes_dn),3])
 

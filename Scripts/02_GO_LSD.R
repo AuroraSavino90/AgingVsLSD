@@ -5,7 +5,7 @@ setwd("workdir")#workdir = working directory
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
 load("Data/original_RData_notclosed/Alldata_20Sep.RData")
-homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
 ####################
 ### GO categories
 ###################

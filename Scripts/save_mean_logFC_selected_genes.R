@@ -37,8 +37,8 @@ load("Results/RData/DE_GSE179379.RData", envir = interv_env)
 load("Data/original_RData_notclosed/Alldata_20Sep.RData", envir = aging_env)
 load("Data/original_RData_notclosed/Dementia_alldata_meta.RData", envir = dem_env)
 
-rat_homologs   <- read.csv("Data/homologs/Human rat homologs.txt")
-mouse_homologs <- read.csv("Data/homologs/Human mouse homologs.txt", sep = "\t")
+rat_homologs   <- read.csv("Data/homologs/Human rat homologs.txt")  # Ensembl 105: BioMart export, human genes (GRCh38.p13) with rat homologs, March 2022
+mouse_homologs <- read.csv("Data/homologs/Human mouse homologs.txt", sep = "\t")  # Ensembl 107: BioMart export, human genes (GRCh38.p13) with mouse homologs, August 2022
 
 # ------------------------------------------------------------
 # 2. INTERVENTION DATASETS: SAME OBJECTS / ORDER AS PROJECT
