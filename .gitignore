@@ -6,3 +6,9 @@ Results/
 Data/
 Discarded_scripts/
 Scripts/ShinyApp/Data/
+original_RData/
+packages/
+Threshold_sensitivity/reference_results/
+Threshold_sensitivity_invivo/reference_results/
+Threshold_sensitivity/Results_*/
+Threshold_sensitivity_invivo/Results_*/
