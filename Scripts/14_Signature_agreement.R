@@ -4,16 +4,16 @@ rm(list=ls())
 setwd("workdir")#workdir = working directory
 set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 
-load("Data/Alldata_20Sep.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Alldata_20Sep.RData), set explicitly
-signature<-read.csv("Data/ACEL-17-e12819-s002.csv")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
+signature<-read.csv("Data/raw_data_notclosed/ACEL-17-e12819-s002.csv")
 signature_up<-signature$Gene.Symbol[signature$Microarray=="up"]
 signature_dn<-signature$Gene.Symbol[signature$Microarray=="down"]
 
 
 ##################################
 load("Results/RData/DE_GSE179379.RData")
-homologs<-read.csv("Data/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 load("Results/RData/fgsea_res.RData")
 
 fgsea_rank<-lapply(fgsea_res, function(x){-log10(x[1,3])*sign(x[1,6])+log10(x[2,3])*sign(x[2,6])})

@@ -4,8 +4,8 @@ setwd("workdir")#workdir = working directory
 
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-load("Data/Alldata_20Sep.RData")
-homologs<-read.csv("Data/Human rat homologs.txt")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 ####################
 ### GO categories
 ###################

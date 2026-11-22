@@ -5,8 +5,8 @@ setwd("workdir")#workdir = working directory
 # Published results: Bioconductor 3.21 annotations (org.Rn.eg.db and GO.db 3.21.0).
 
 load("Results/RData/DE_GSE179379.RData")
-load("Data/Alldata_20Sep.RData")
-homologs<-read.csv("Data/Human rat homologs.txt")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 load("Results/ego_up_valid.RData")
 load("Results/ego_down_valid.RData")
 
@@ -219,61 +219,6 @@ write.xlsx(all_stats_up, "results/GO_all_stats_up.xlsx")
 
 
 ##############################
-#### paths in common across invitro comparisons (Up)
-#############################
-load("Results/ego_up_invitro.RData")
-
-allpaths_invitro_revert<-c()
-for(i in 4:length(ego_up)){
-  allpaths_invitro_revert<-union(allpaths_invitro_revert, ego_up[[i]]$Description)
-}
-
-allp_mat_invitro_revert<-matrix(NA,nrow=length(allpaths_invitro_revert), ncol=3)
-rownames(allp_mat_invitro_revert)<-allpaths_invitro_revert
-for(i in 4:length(ego_up)){
-  allp_mat_invitro_revert[ego_up[[i]]$Description,i-3]<-ego_up[[i]]$pvalue
-}
-
-pup_invitro_revert<-list()
-ind<-0
-for(up in allpaths_invitro_revert){
-  ind<-ind+1
-  istwo <- rep(F, 5)
-  toinvert <- rep(F, 5)
-  missing<-which(is.na(allp_mat_invitro_revert[up, ]))
-  if(length(missing)==0){
-    pup_invitro_revert[[ind]]<-sumlog(two2one(allp_mat_invitro_revert[up, ], two = istwo, invert = toinvert))[[3]]
-  } else {
-    pup_invitro_revert[[ind]]<-sumlog(two2one(allp_mat_invitro_revert[up, ][-missing], two = istwo[-missing], invert = toinvert[-missing]))[[3]]
-  }
-}
-
-pup_invitro_revert<-p.adjust(pup_invitro_revert, method="fdr")
-names(pup_invitro_revert)<-allpaths_invitro_revert
-
-DE_GO_invitro_revert<-names(pup_invitro_revert)[which(pup_invitro_revert<0.05)]
-
-intersect(path_sel, DE_GO_invitro_revert)
-
-############################
-### invitro revert plots up
-##############################
-inboth<-intersect(path_sel2, rownames(allp_mat_invitro_revert))
-toplot<- -log10(allp_mat_invitro_revert[inboth,])
-colnames(toplot)<-c("Abeta100+LSD VS Abeta100", "Abeta500+LSD VS Abeta500", "Abeta1000+LSD VS Abeta1000")
-
-paletteLength <- 50
-myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
-myBreaks <- c(seq(min(unlist(toplot), na.rm=T), 0, length.out=ceiling(paletteLength/2) + 1),
-              seq(max(unlist(toplot), na.rm=T)/paletteLength, max(unlist(toplot), na.rm=T), length.out=floor(paletteLength/2)))
-
-pdf("Results/Figures/GOup_top_invitro_revert.pdf",15,8)
-pheatmap(toplot, cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T, cluster_rows = F,  cluster_cols = F)
-dev.off()
-
-
-
-##############################
 #### paths in common across LSD datasets (Down)
 #############################
 
@@ -423,61 +368,6 @@ all_stats_dn<-cbind(pathway=path_sel, allNES_mat_sel[path_sel, ], allp_mat_sel[p
                     logFDRLSD=-log10(unlist(pdn_LSD[path_sel])),logFDRAging=-log10(unlist(pdn[path_sel])),
                     path=path_sel)[order((-log10(unlist(pdn_LSD[path_sel]))-log10(unlist(pdn[path_sel]))),decreasing = T),]
 write.xlsx(all_stats_dn, "results/GO_all_stats_dn.xlsx")
-
-
-##############################
-#### paths in common across invitro comparisons (Down)
-#############################
-load("Results/ego_down_invitro.RData")
-
-allpaths_invitro_revert<-c()
-for(i in 4:length(ego_down)){
-  allpaths_invitro_revert<-union(allpaths_invitro_revert, ego_down[[i]]$Description)
-}
-
-allp_mat_invitro_revert<-matrix(NA,nrow=length(allpaths_invitro_revert), ncol=3)
-rownames(allp_mat_invitro_revert)<-allpaths_invitro_revert
-for(i in 4:length(ego_down)){
-  allp_mat_invitro_revert[ego_down[[i]]$Description,i-3]<-ego_down[[i]]$pvalue
-}
-
-pdn_invitro_revert<-list()
-ind<-0
-for(dn in allpaths_invitro_revert){
-  ind<-ind+1
-  istwo <- rep(F, 5)
-  toinvert <- rep(F, 5)
-  missing<-which(is.na(allp_mat_invitro_revert[dn, ]))
-  if(length(missing)==0){
-    pdn_invitro_revert[[ind]]<-sumlog(two2one(allp_mat_invitro_revert[dn, ], two = istwo, invert = toinvert))[[3]]
-  } else {
-    pdn_invitro_revert[[ind]]<-sumlog(two2one(allp_mat_invitro_revert[dn, ][-missing], two = istwo[-missing], invert = toinvert[-missing]))[[3]]
-  }
-}
-
-pdn_invitro_revert<-p.adjust(pdn_invitro_revert, method="fdr")
-names(pdn_invitro_revert)<-allpaths_invitro_revert
-
-DE_GO_invitro_revert<-names(pdn_invitro_revert)[which(pdn_invitro_revert<0.05)]
-
-intersect(DE_GO_invitro_revert, path_sel)
-
-############################
-### invitro revert plots dn
-##############################
-inboth<-intersect(path_sel2, rownames(allp_mat_invitro_revert))
-toplot<- -log10(allp_mat_invitro_revert[inboth,])
-colnames(toplot)<-c("Abeta100+LSD VS Abeta100", "Abeta500+LSD VS Abeta500", "Abeta1000+LSD VS Abeta1000")
-
-paletteLength <- 50
-myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
-myBreaks <- c(seq(min(unlist(toplot), na.rm=T), 0, length.out=ceiling(paletteLength/2) + 1),
-              seq(max(unlist(toplot), na.rm=T)/paletteLength, max(unlist(toplot), na.rm=T), length.out=floor(paletteLength/2)))
-
-pdf("Results/Figures/GOdn_top_invitro_revert.pdf",15,8)
-pheatmap(toplot, cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T,  cluster_rows = F,  cluster_cols = F)
-dev.off()
-
 
 
 #########################################

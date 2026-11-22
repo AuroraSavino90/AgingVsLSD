@@ -4,9 +4,9 @@ setwd("workdir")#workdir = working directory
 set.seed(1234)  # fixed seed; where a random state is set after load() below, that state is used instead (README.md, "Random numbers")
 
 load("Results/RData/DE_GSE179379.RData")
-load("Data/Alldata_20Sep.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Alldata_20Sep.RData), set explicitly
-homologs<-read.csv("Data/Human rat homologs.txt")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 
 
 library(GEOquery)
@@ -45,18 +45,18 @@ changenames<-function(data, anno){
 ################################
 ##########MSBB
 ###############################
-# MSBB (AD Knowledge Portal) is controlled-access data. Without Data/AD portal/, the
+# MSBB (AD Knowledge Portal) is controlled-access data. Without Data/raw_data_closed/AD portal/, the
 # gene-wise correlations with age and with the Braak score are read from
 # Data/closed_data_intermediate/MSBB_gene_correlations.RData (written by this script
 # when the MSBB files are present). The GSEA below is the same in both cases.
-has_msbb <- file.exists("Data/AD portal/MSBB_Normalized_counts_(CQN).tsv")
+has_msbb <- file.exists("Data/raw_data_closed/AD portal/MSBB_Normalized_counts_(CQN).tsv")
 if (!has_msbb) {
   load("Data/closed_data_intermediate/MSBB_gene_correlations.RData")  # cor_age, cor_braak
-  message("Data/AD portal not found: MSBB gene correlations read from Data/closed_data_intermediate")
+  message("Data/raw_data_closed/AD portal not found: MSBB gene correlations read from Data/closed_data_intermediate")
 }
 if (has_msbb) {
-MSBB<-read.csv("Data/AD portal/MSBB_Normalized_counts_(CQN).tsv", sep="\t", row.names = 1)
-MSBB_meta<-read.csv("Data/AD portal/RNAseq_Harmonization_MSBB_combined_metadata.csv")
+MSBB<-read.csv("Data/raw_data_closed/AD portal/MSBB_Normalized_counts_(CQN).tsv", sep="\t", row.names = 1)
+MSBB_meta<-read.csv("Data/raw_data_closed/AD portal/RNAseq_Harmonization_MSBB_combined_metadata.csv")
 
 #reorder metadata to mach order of counts
 MSBB_meta<-MSBB_meta[match(colnames(MSBB), MSBB_meta[,1]),]
@@ -84,7 +84,7 @@ cor_age<-cor(t(MSBB_sel), as.numeric(age))
 library(fgsea)
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-homologs<-read.csv("Data/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]
@@ -133,7 +133,7 @@ save(cor_age, cor_braak, file="Results/RData/MSBB_gene_correlations.RData")  # g
 library(fgsea)
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-homologs<-read.csv("Data/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]

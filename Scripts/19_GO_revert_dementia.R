@@ -11,7 +11,7 @@ dir.create("Results/RData", showWarnings = FALSE, recursive = TRUE)
 dir.create("Results/Figures", showWarnings = FALSE, recursive = TRUE)
 
 # Packages are attached BEFORE the load() calls: attaching clusterProfiler draws one
-# random number, and load("Data/Dementia_alldata_meta.RData") restores the random
+# random number, and load("Data/original_RData_notclosed/Dementia_alldata_meta.RData") restores the random
 # state saved in that file, which the dementia gseGO below must start from
 # (published Tables S19-S21). Table S21 also needs org.Mm.eg.db 3.21.0
 # (see README.md, "R environments").
@@ -27,22 +27,22 @@ suppressPackageStartupMessages({
 # -----------------------------
 # LOAD
 # -----------------------------
-load("Data/Psychedelics_PFC.RData")
-load("Data/Alldata_20Sep.RData")
-load("Data/ExerciseAndAlcohol.RData")
-load("Data/Dementia_alldata_meta.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Dementia_alldata_meta.RData), set explicitly
+load("Data/original_RData_notclosed/Psychedelics_PFC.RData")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
+load("Data/original_RData_notclosed/ExerciseAndAlcohol.RData")
+load("Data/original_RData_notclosed/Dementia_alldata_meta.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Dementia_alldata_meta.RData), set explicitly
 # clusterProfiler keeps its annotation caches in .GlobalEnv and reuses them instead of org.Rn.eg.db
 # and GO.db: .GO_clusterProfiler_Env (rat gene-GO table, SYMBOL, BP), .GOTERM_Env (GO term table)
-# and .Anno_clusterProfiler_Env. The original Data/ExerciseAndAlcohol.RData workspace (saved
+# and .Anno_clusterProfiler_Env. The original Data/original_RData_notclosed/ExerciseAndAlcohol.RData workspace (saved
 # 21/09/2022) contained all three, so the published chronic-LSD enrichGO below (Tables S19-S21,
 # Figs 3J-K and S12) used the 2022 annotations. The rebuilt RData contain only data: the three
-# caches are restored here (Data/clusterProfiler_cache_2022.rds, extracted from that workspace).
-local({ cache <- readRDS("Data/clusterProfiler_cache_2022.rds")
+# caches are restored here (Data/original_RData_notclosed/clusterProfiler_cache_2022.rds, extracted from that workspace).
+local({ cache <- readRDS("Data/original_RData_notclosed/clusterProfiler_cache_2022.rds")
   for (en in names(cache)) { env <- new.env(); for (n in names(cache[[en]])) assign(n, cache[[en]][[n]], envir = env)
     assign(en, env, envir = .GlobalEnv) } })
 load("Results/RData/DE_GSE179379.RData")
-homologs <- read.csv("Data/Human rat homologs.txt")
+homologs <- read.csv("Data/homologs/Human rat homologs.txt")
 
 # -----------------------------
 # Helpers
@@ -314,8 +314,8 @@ thr_invitro <- 0.05
 outdir_inv <- "Results/OppositeGO_invitro_tests_DEMENTIA"   
 dir.create(outdir_inv, showWarnings = FALSE, recursive = TRUE)
 
-xlsx_metadata  <- "Data/In vitro RNA-seq_all/Metadata.xlsx"
-tsv_counts     <- "Data/In vitro RNA-seq_all/salmon.merged.gene_counts.tsv"
+xlsx_metadata  <- "Data/raw_data_notclosed/In vitro RNA-seq_all/Metadata.xlsx"
+tsv_counts     <- "Data/raw_data_notclosed/In vitro RNA-seq_all/salmon.merged.gene_counts.tsv"
 
 # -----------------------------
 # Helper functions 

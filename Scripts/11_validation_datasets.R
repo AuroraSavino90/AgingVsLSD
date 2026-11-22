@@ -22,7 +22,7 @@ read_gse_local <- function(series_file, gpl_file) {
 ##########GSE36192
 ###############################
 
-gds <- list(GSE36192_series_matrix.txt.gz = read_gse_local("Data/GSE36192_series_matrix.txt.gz", "Data/GPL6947.annot.gz"))
+gds <- list(GSE36192_series_matrix.txt.gz = read_gse_local("Data/raw_data_notclosed/GSE36192_series_matrix.txt.gz", "Data/raw_data_notclosed/GPL6947.annot.gz"))
 
 GSE36192<-exprs(gds$GSE36192_series_matrix.txt.gz)
 GSE36192_meta<-pData(gds$GSE36192_series_matrix.txt.gz)
@@ -35,7 +35,7 @@ GSE36192<-log2(GSE36192)
 ##########GSE25219
 ###############################
 
-gds <- list(`GSE25219-GPL5175_series_matrix.txt.gz` = read_gse_local("Data/GSE25219-GPL5175_series_matrix.txt.gz", "Data/GPL5175.soft.gz"))
+gds <- list(`GSE25219-GPL5175_series_matrix.txt.gz` = read_gse_local("Data/raw_data_notclosed/GSE25219-GPL5175_series_matrix.txt.gz", "Data/raw_data_notclosed/GPL5175.soft.gz"))
 
 GSE25219<-exprs(gds$`GSE25219-GPL5175_series_matrix.txt.gz`)
 GSE25219_meta<-pData(gds$`GSE25219-GPL5175_series_matrix.txt.gz`)
@@ -52,7 +52,7 @@ GSE25219<-changenames(data=GSE25219, anno=cbind(GSE25219_anno$ID, symbols))
 library(fgsea)
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-homologs<-read.csv("Data/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 
 genes_up<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange>0 & DE_GSE179379$padj<0.05)]
 genes_dn<-rownames(DE_GSE179379)[which(DE_GSE179379$log2FoldChange<0 & DE_GSE179379$padj<0.05)]

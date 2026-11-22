@@ -40,9 +40,9 @@ library(FactoMineR)
 library(ggplot2)
 library(cowplot)
 
-metadata<-read.xlsx("Data/In vitro RNA-seq_all/Metadata.xlsx", rowNames = T)
+metadata<-read.xlsx("Data/raw_data_notclosed/In vitro RNA-seq_all/Metadata.xlsx", rowNames = T)
 
-invitro_counts=read.table("Data/In vitro RNA-seq_all/salmon.merged.gene_counts.tsv",header=TRUE)
+invitro_counts=read.table("Data/raw_data_notclosed/In vitro RNA-seq_all/salmon.merged.gene_counts.tsv",header=TRUE)
 rownames(invitro_counts)=invitro_counts$gene_id
 anno<-invitro_counts[,c(1:2)]
 invitro_counts<-changenames(invitro_counts[,-c(1:2)], anno = anno)
@@ -137,42 +137,6 @@ write.xlsx(data.frame(ddsAbeta500), file="results/Abeta500DEGs.xlsx", rowNames=T
 write.xlsx(data.frame(ddsAbeta100), file="results/Abeta100DEGs.xlsx", rowNames=T)
 
 save(dds, file="Results/dds_Abeta.RData")
-
-DEGs_seq<-c("ddsAbeta100", "ddsAbeta500", "ddsAbeta1000")
-
-library(clusterProfiler)
-library(org.Rn.eg.db)   
-ego_down_Abeta_sep<-list()
-ego_up_Abeta_sep<-list()
-i<-0
-for(DE in DEGs_seq){
-  i<-i+1
-  DEGs<-get(DE)
-  genes_up<-rownames(DEGs)[which(DEGs$log2FoldChange>0 & DEGs$padj<0.05)]
-  genes_dn<-rownames(DEGs)[which(DEGs$log2FoldChange<0 & DEGs$padj<0.05)]
-  
-  universe<-rownames(DEGs)
-  
-  ego_down_Abeta_sep[[i]]<- enrichGO(gene = genes_dn,
-                           keyType="SYMBOL",
-                           ont           = "BP",
-                           pAdjustMethod = "BH",
-                           pvalueCutoff  = 1,
-                           qvalueCutoff  = 1,
-                           universe=universe, OrgDb="org.Mm.eg.db")
-  
-  ego_up_Abeta_sep[[i]]<- enrichGO(gene = genes_up,
-                         keyType="SYMBOL",
-                         ont           = "BP",
-                         pAdjustMethod = "BH",
-                         pvalueCutoff  = 1,
-                         qvalueCutoff  = 1,
-                         universe=universe, OrgDb="org.Mm.eg.db")
-  
-}
-
-save(ego_up_Abeta_sep, file="Results/ego_up_Abeta_sep.RData")
-save(ego_down_Abeta_sep, file="Results/ego_down_Abeta_sep.RData")
 
 
 thr<-0.05
@@ -426,64 +390,4 @@ pdf("results/Figures/invitro_PCA_log2FC.pdf", 6, 6)
 ggplot(df, aes(x=PC1, y=PC2, label=condition))+geom_point(size=2)+geom_label()+theme_classic()
 dev.off()
 
-
-##########
-## GO for Abeta and Abeta + LSD
-#########
-
-DEGs_seq<-c("ddsAbeta100", "ddsAbeta500", "ddsAbeta1000", "ddsAbeta100LSD", "ddsAbeta500LSD", "ddsAbeta1000LSD")
-
-library(clusterProfiler)
-library(org.Rn.eg.db)   
-ego_down<-list()
-ego_up<-list()
-i<-0
-for(DE in DEGs_seq){
-  i<-i+1
-   DEGs<-get(DE)
-  genes_up<-rownames(DEGs)[which(DEGs$log2FoldChange>0 & DEGs$padj<0.05)]
-  genes_dn<-rownames(DEGs)[which(DEGs$log2FoldChange<0 & DEGs$padj<0.05)]
-  
-  universe<-rownames(DEGs)
-  
-  ego_down[[i]]<- enrichGO(gene = genes_dn,
-                           keyType="SYMBOL",
-                           ont           = "BP",
-                           pAdjustMethod = "BH",
-                           pvalueCutoff  = 1,
-                           qvalueCutoff  = 1,
-                           universe=universe, OrgDb="org.Mm.eg.db")
-  
-  ego_up[[i]]<- enrichGO(gene = genes_up,
-                         keyType="SYMBOL",
-                         ont           = "BP",
-                         pAdjustMethod = "BH",
-                         pvalueCutoff  = 1,
-                         qvalueCutoff  = 1,
-                         universe=universe, OrgDb="org.Mm.eg.db")
-  
-}
-
-save(ego_up, file="Results/ego_up_invitro.RData")
-save(ego_down, file="Results/ego_down_invitro.RData")
-
-
-ego_down_Abeta<- enrichGO(gene = Abeta_genes_dn,
-                         keyType="SYMBOL",
-                         ont           = "BP",
-                         pAdjustMethod = "BH",
-                         pvalueCutoff  = 1,
-                         qvalueCutoff  = 1,
-                         universe=universe, OrgDb="org.Mm.eg.db")
-
-ego_up_Abeta<- enrichGO(gene = Abeta_genes_up,
-                       keyType="SYMBOL",
-                       ont           = "BP",
-                       pAdjustMethod = "BH",
-                       pvalueCutoff  = 1,
-                       qvalueCutoff  = 1,
-                       universe=universe, OrgDb="org.Mm.eg.db")
-
-save(ego_up_Abeta, file="Results/ego_up_Abeta.RData")
-save(ego_down_Abeta, file="Results/ego_down_Abeta.RData")
 

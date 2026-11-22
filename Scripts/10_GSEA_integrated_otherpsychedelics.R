@@ -5,14 +5,14 @@ set.seed(1234)  # fixed seed for fgsea/gseGO permutations (the published GSEA va
 #################################################
 #########GSEA with the batch corrected dataset
 ##################################################
-load("Data/ExerciseAndAlcohol.RData")
+load("Data/original_RData_notclosed/ExerciseAndAlcohol.RData")
 load("Results/RData/alldata_resid.RData")
 load("Results/RData/age_all.RData")
 
-load("Data/Psychedelics_PFC.RData")
-load("Data/Alldata_20Sep.RData")
-rat_homologs<-read.csv("Data/Human rat homologs.txt")
-mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
+load("Data/original_RData_notclosed/Psychedelics_PFC.RData")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
+rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
 
 mouse_data<-c("DE_GSE64607","DE_GSE164798_chronic", "DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626",
               "DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",

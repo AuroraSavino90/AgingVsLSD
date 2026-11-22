@@ -5,9 +5,9 @@ set.seed(1234)  # fixed seed; where a random state is set after load() below, th
 library(fgsea)
 library(ggplot2)
 load("Results/RData/DE_GSE179379.RData")
-load("Data/Alldata_20Sep.RData")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
 set.seed(1234)  # fixed seed for the CMap GSEA (Fig 1C-D, Figs S7-S8);
-homologs<-read.csv("Data/Human rat homologs.txt")
+homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 #######################
 ### random drugs
 ######################

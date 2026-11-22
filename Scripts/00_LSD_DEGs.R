@@ -1,7 +1,7 @@
 suppressMessages(library(DESeq2))  # DESeqResults objects need DESeq2/S4Vectors loaded (rownames() returns NULL otherwise)
 rm(list=ls())
 setwd("workdir")#workdir = working directory
-load("Data/Psychedelics_PFC.RData")
+load("Data/original_RData_notclosed/Psychedelics_PFC.RData")
 
 library(DESeq2)
 

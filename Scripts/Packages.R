@@ -13,6 +13,9 @@ library(org.Hs.eg.db)
 library(slinky)
 library(GSVA)
 library(GEOquery)
+library(fgsea)
+library(data.table)
+library(ggside)
 
 # Save versions of loaded packages
 pkgs <- sessionInfo()$otherPkgs

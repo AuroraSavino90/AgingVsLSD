@@ -8,13 +8,13 @@ library(fgsea)
 library(ggplot2)
 library(limma)
 library(ggrepel)
-load("Data/ExerciseAndAlcohol.RData")
-load("Data/Psychedelics_PFC.RData")
-load("Data/Alldata_20Sep.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Alldata_20Sep.RData), set explicitly
+load("Data/original_RData_notclosed/ExerciseAndAlcohol.RData")
+load("Data/original_RData_notclosed/Psychedelics_PFC.RData")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
 source("Scripts/utilities.R")
-rat_homologs<-read.csv("Data/Human rat homologs.txt")
-mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
+rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt")
+mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
 
 mouse_data<-c("DE_GSE64607","DE_GSE164798_chronic", "DE_GSE72507_0", "DE_GSE60676_0",  "DE_GSE28515_C57", "DE_MDMA", "DE_GSE161626",
               "DE_GSE161626_48h","DE_GSE161626_7d","DE_GSE81672","DE_GSE26364","DE_GSE209859",
@@ -463,7 +463,7 @@ for(dd in dat){
 }
 
 ####define DEGs in rats aging
-GSE75772<-read.csv("Data/GSE75772_DEseq-normalized.counts_mPFC.csv.gz", row.names = 1)
+GSE75772<-read.csv("Data/raw_data_notclosed/GSE75772_DEseq-normalized.counts_mPFC.csv.gz", row.names = 1)
 
 # Ensembl release pinned (original: live Ensembl in Sep 2025 = release 114/115, identical for these IDs)
 source("Scripts/data_preparation/ensembl_release_map.R")
@@ -474,7 +474,7 @@ ids <- ids[ids$ensembl_gene_id %in% rownames(GSE75772), ]
 GSE75772<-changenames(data=GSE75772, anno=ids)
 GSE75772<-log2(GSE75772+1)
 
-GSE75772_meta<-read.csv("Data/GSE75772_series_matrix.txt", sep="\t")
+GSE75772_meta<-read.csv("Data/raw_data_notclosed/GSE75772_series_matrix.txt", sep="\t")
 
 homologs<-rat_homologs
 
@@ -492,7 +492,7 @@ genes_up<-unique(homologs[which(homologs[,2] %in% genes_up),3])
 genes_dn<-unique(homologs[which(homologs[,2] %in% genes_dn),3])
 
 # rat aging (GSE75772) GSEA: the published values (Tables S4, S7, Fig 1E) come from an earlier run
-# (September 2025) that started from the random state saved in Data/Alldata_20Sep.RData advanced by
+# (September 2025) that started from the random state saved in Data/original_RData_notclosed/Alldata_20Sep.RData advanced by
 # 1559 uniform draws (found by search, see README.md, "Random numbers"). The GSEA of the other interventions
 # above keep the state set after load().
 assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv); invisible(runif(1559))

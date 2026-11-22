@@ -9,23 +9,23 @@ library(DESeq2)
 source("Scripts/utilities.R")
 
 # 15 samples deposited in GEO (GSE263662): cohorts C1-C3, one mouse per dose (0, 50, 100, 200, 500 ug/kg) per cohort
-meta<-read.xlsx("Data/Samples_LSD.xlsx",1)
+meta<-read.xlsx("Data/raw_data_notclosed/Samples_LSD.xlsx",1)
 meta$dose[meta$dose=="ctrl"]<-0
 
 #load counts (two lanes per sample, files ordered as the samples in meta)
-filesL1<-list.files("Data/Counts", pattern="L001")
-filesL2<-list.files("Data/Counts",pattern="L002")
+filesL1<-list.files("Data/raw_data_notclosed/Invivo RNAseq", pattern="L001")
+filesL2<-list.files("Data/raw_data_notclosed/Invivo RNAseq",pattern="L002")
 filesL1<-filesL1[match(paste0("_S", meta$sample, "_"), regmatches(filesL1, regexpr("_S[0-9]+_", filesL1)))]
 filesL2<-filesL2[match(paste0("_S", meta$sample, "_"), regmatches(filesL2, regexpr("_S[0-9]+_", filesL2)))]
-L1mat<-read.csv(paste("Data/Counts", filesL1[1], sep="/"), sep="\t")
+L1mat<-read.csv(paste("Data/raw_data_notclosed/Invivo RNAseq", filesL1[1], sep="/"), sep="\t")
 for(i in filesL1){
-  L1mat<-cbind(L1mat, read.csv(paste("Data/Counts", i, sep="/"), sep="\t")[,2])
+  L1mat<-cbind(L1mat, read.csv(paste("Data/raw_data_notclosed/Invivo RNAseq", i, sep="/"), sep="\t")[,2])
 }
 rownames(L1mat)<-L1mat[,1]
 L1mat<-L1mat[,-c(1,2)]
-L2mat<-read.csv(paste("Data/Counts", filesL2[1], sep="/"), sep="\t")
+L2mat<-read.csv(paste("Data/raw_data_notclosed/Invivo RNAseq", filesL2[1], sep="/"), sep="\t")
 for(i in filesL2){
-  L2mat<-cbind(L2mat, read.csv(paste("Data/Counts", i, sep="/"), sep="\t")[,2])
+  L2mat<-cbind(L2mat, read.csv(paste("Data/raw_data_notclosed/Invivo RNAseq", i, sep="/"), sep="\t")[,2])
 }
 rownames(L2mat)<-L2mat[,1]
 L2mat<-L2mat[,-c(1,2)]
@@ -61,10 +61,10 @@ DE_50 <- DESeq2::results(dds, contrast = c("dose", "50", "0"))
 library(fgsea)
 library(ggrepel)
 
-load("Data/Alldata_20Sep.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Alldata_20Sep.RData), set explicitly
-rat_homologs<-read.csv("Data/Human rat homologs.txt", sep="\t")
-mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
+rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt", sep="\t")
+mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
 
 library(metap)
 

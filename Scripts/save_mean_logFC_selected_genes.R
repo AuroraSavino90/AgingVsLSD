@@ -30,15 +30,15 @@ interv_env <- new.env(parent = globalenv())
 aging_env  <- new.env(parent = globalenv())
 dem_env    <- new.env(parent = globalenv())
 
-load("Data/Psychedelics_PFC.RData", envir = interv_env)
-load("Data/ExerciseAndAlcohol.RData", envir = interv_env)
+load("Data/original_RData_notclosed/Psychedelics_PFC.RData", envir = interv_env)
+load("Data/original_RData_notclosed/ExerciseAndAlcohol.RData", envir = interv_env)
 load("Results/RData/DE_GSE179379.RData", envir = interv_env)
 
-load("Data/Alldata_20Sep.RData", envir = aging_env)
-load("Data/Dementia_alldata_meta.RData", envir = dem_env)
+load("Data/original_RData_notclosed/Alldata_20Sep.RData", envir = aging_env)
+load("Data/original_RData_notclosed/Dementia_alldata_meta.RData", envir = dem_env)
 
-rat_homologs   <- read.csv("Data/Human rat homologs.txt")
-mouse_homologs <- read.csv("Data/Human mouse homologs.txt", sep = "\t")
+rat_homologs   <- read.csv("Data/homologs/Human rat homologs.txt")
+mouse_homologs <- read.csv("Data/homologs/Human mouse homologs.txt", sep = "\t")
 
 # ------------------------------------------------------------
 # 2. INTERVENTION DATASETS: SAME OBJECTS / ORDER AS PROJECT
@@ -92,7 +92,7 @@ intervention_info[, data_class := fifelse(DE %in% c(DEGs_array, "DE_GSE75772"), 
 # 3. RAT AGING CONTROL (GSE75772): Aged vs Young
 # ------------------------------------------------------------
 
-GSE75772 <- read.csv("Data/GSE75772_DEseq-normalized.counts_mPFC.csv.gz",
+GSE75772 <- read.csv("Data/raw_data_notclosed/GSE75772_DEseq-normalized.counts_mPFC.csv.gz",
                      row.names = 1, check.names = FALSE)
 
 gene_symbols <- as.character(AnnotationDbi::mapIds(
@@ -112,7 +112,7 @@ GSE75772 <- GSE75772[keep_rows, , drop = FALSE]
 rownames(GSE75772) <- gene_symbols[keep_rows]
 GSE75772 <- log2(GSE75772 + 1)
 
-age_lab <- unlist(read.csv("Data/GSE75772_series_matrix.txt", sep = "\t")[10, 2:32])
+age_lab <- unlist(read.csv("Data/raw_data_notclosed/GSE75772_series_matrix.txt", sep = "\t")[10, 2:32])
 aged  <- data.frame(GSE75772[, age_lab == "age: Aged",  drop = FALSE])
 young <- data.frame(GSE75772[, age_lab == "age: Young", drop = FALSE])
 

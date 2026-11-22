@@ -7,14 +7,14 @@ library(fgsea)
 Abeta_genes_up<-read.csv(file="results/Abeta_genes_up_005.csv")[,2]
 Abeta_genes_dn<-read.csv(file="results/Abeta_genes_dn_005.csv")[,2]
 
-mouse_homologs<-read.csv("Data/Human mouse homologs.txt", sep="\t")
+mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
 Abeta_genes_up<-unique(mouse_homologs[which(mouse_homologs[,2] %in% Abeta_genes_up),3])
 Abeta_genes_dn<-unique(mouse_homologs[which(mouse_homologs[,2] %in% Abeta_genes_dn),3])
 
 
 
-load("Data/Dementia_alldata_meta.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/Dementia_alldata_meta.RData), set explicitly
+load("Data/original_RData_notclosed/Dementia_alldata_meta.RData")
+assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Dementia_alldata_meta.RData), set explicitly
 
 region<-"DLPFC"
 diagnosis<-c("Healthy", "Alzheimer")
