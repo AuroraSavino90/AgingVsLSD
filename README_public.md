@@ -1,35 +1,89 @@
 # AgingVsLSD: analysis pipeline
 
-This folder contains everything needed to rerun the analyses of the paper, from the
-raw data to the supplementary tables and figures, without an internet connection:
-- the input data (`Data/`), except the non-public raw data (section 4);
-- the four input RData files used for the paper (`Data/original_RData_notclosed/`), without
-  the raw tables of the non-public datasets but with their DE tables (section 4);
-- the code (`Scripts/`);
-- the R packages (`Data/packages/`) and the scripts that install and run them.
+Code and data to reproduce the analyses of:
 
-The analysis always runs on the deposited input RData of `Data/original_RData_notclosed/`,
-which also contain the DE tables of the non-public datasets, so every analysis script is
-run. The MSBB gene correlations are read from `Data/closed_data_intermediate/` (section 4).
-The RData rebuilt from the raw data are only compared with the deposited ones.
+> Savino A, Liaci C, Bertani I, Rando S, Camera M, Merlo GR, Avalle L, Poli V, Kalebic N,
+> Iorio F. Lysergic Acid Diethylamide Induces Transcriptional Changes Opposing Signatures
+> of Brain Ageing and Neurodegeneration. *Aging Cell* (2026).
+> https://doi.org/10.1111/acel.70793
+
+The pipeline goes from the raw data to the supplementary tables and figures of the
+paper, without an internet connection. It is distributed in two parts:
+- **the code**, in this GitHub repository (https://github.com/AuroraSavino90/AgingVsLSD):
+  `run_all.R`, `Scripts/`, `Threshold_sensitivity/`, `Threshold_sensitivity_invivo/`
+  and this README;
+- **the data**, in the Zenodo record https://zenodo.org/records/8431269: the folder
+  `Data/`, with the input data, the four input RData files used for the paper, the
+  distributed intermediate files and the R packages for the offline installation.
+
+The non-public raw data (MDMA, DMT/pharmahuasca/harmaline, MSBB) are not distributed
+(section 5). The analysis does not need them: it runs on the deposited input RData of
+`Data/original_RData_notclosed/`, which contain their DE tables, and reads the MSBB gene
+correlations from `Data/closed_data_intermediate/`. The RData rebuilt from the raw data
+are only compared with the deposited ones.
 
 Contents:
-1. How to run
-2. Folder layout
-3. Input data
-4. Non-public data
-5. Data preparation: the four input RData files
-6. Analysis scripts
-7. Intermediate files
-8. R environments
-9. Random numbers
-10. Numerical precision
+1. Download
+2. How to run
+3. Folder layout
+4. Input data
+5. Non-public data
+6. Data preparation: the four input RData files
+7. Analysis scripts
+8. Intermediate files
+9. R environments
+10. Random numbers
+11. Numerical precision
 
-## 1. How to run
+## 1. Download
 
-Requirements: Windows, **R 4.5**, about 10 GB of free disk space.
+1. **Code.** Clone the repository, or download it as a ZIP file from GitHub and extract it:
 
-Open a terminal in this folder and run:
+   ```
+   git clone https://github.com/AuroraSavino90/AgingVsLSD.git
+   ```
+
+   Put it in a folder outside Dropbox, OneDrive or similar services (the data take about
+   20 GB, the results of a run about 8 GB more).
+
+2. **Data.** Download all the files of the Zenodo record https://zenodo.org/records/8431269
+   (about 20 GB) and extract them into the repository folder, so that `Data/` sits next to
+   `run_all.R` and `Scripts/`:
+
+   ```
+   AgingVsLSD/
+   ├── run_all.R
+   ├── Scripts/
+   ├── Threshold_sensitivity/
+   ├── Threshold_sensitivity_invivo/
+   └── Data/
+       ├── original_RData_notclosed/   the four input RData files, cmap/, seeded_intermediate/,
+       │                               clusterProfiler_cache_2022.rds, rng_states.rds
+       ├── intermediate_RData/         DE_GSE179379.RData, gsea_GO.RData, genes_cor.RData
+       ├── raw_data_notclosed/         aging_GEO/, psychedelics_GEO/, exercise_alcohol_GEO/,
+       │                               dementia_GEO/, Invivo RNAseq/, In vitro RNA-seq_all/,
+       │                               GTEx, GSE75772, GSE25219, GSE36192 and LINCS annotation files
+       ├── closed_data_intermediate/   MSBB_gene_correlations.RData
+       ├── homologs/                   Human rat homologs.txt, Human mouse homologs.txt
+       ├── ensembl/                    Ensembl ID-symbol tables (releases 105, 107, 115)
+       ├── envs/                       environments.csv, *_versions.csv
+       └── packages/                   R packages for the offline installation
+   ```
+
+   The scripts read these paths as they are (section 3): do not rename or move the
+   folders.
+
+3. **Non-public data (optional).** With the MDMA, DMT/pharmahuasca/harmaline or MSBB
+   data, obtained as described in section 5, put them in `Data/raw_data_closed/` (paths
+   in the table of section 5). The pipeline then also rebuilds and checks the DE tables
+   computed from them; the results of the analysis do not change.
+
+## 2. How to run
+
+Requirements: Windows, **R 4.5**, about 30 GB of free disk space (data, R libraries
+and results).
+
+Open a terminal in the repository folder (section 1) and run:
 
 ```
 Rscript Scripts/Reproducibility/install_environment.R
@@ -46,18 +100,18 @@ Rscript run_all.R C:/AgingVsLSD_run
 
    | Step | What it does | Output in `C:/AgingVsLSD_run` |
    |---|---|---|
-   | `prepare` | rebuilds the four input RData files from the raw data in `Data/raw_data_notclosed/` (`Scripts/data_preparation`, section 5); `Psychedelics_PFC.RData` without the DE tables of the non-public datasets (section 4) | `rebuilt_RData/*.RData` |
+   | `prepare` | rebuilds the four input RData files from the raw data in `Data/raw_data_notclosed/` (`Scripts/data_preparation`, section 6); `Psychedelics_PFC.RData` without the DE tables of the non-public datasets (section 5) | `rebuilt_RData/*.RData` |
    | `verify` | compares the rebuilt input RData with the deposited ones (`Data/original_RData_notclosed/`), object by object | `comparison/data_preparation_verification.csv` |
-   | `analysis` | runs the analysis scripts (section 6), each in a fresh R session with its own R library (section 8), on the deposited input RData (`Data/original_RData_notclosed/`), never on the rebuilt ones | `Results/`, `figures_NES/`, `figures_dementia_cohen/` |
+   | `analysis` | runs the analysis scripts (section 7), each in a fresh R session with its own R library (section 9), on the deposited input RData (`Data/original_RData_notclosed/`), never on the rebuilt ones | `Results/`, `figures_NES/`, `figures_dementia_cohen/` |
 
    The steps can also be run one at a time, for example
    `Rscript run_all.R C:/AgingVsLSD_run analysis` (about 5 h).
    The option `--rdata=notclosed` (the default here) chooses the files `verify` compares
    with; `--rdata=full` selects `Data/original_RData/`, the complete original files, which
-   are not distributed (section 4).
+   are not distributed (section 5).
 
 All R processes get a non-working proxy, so nothing can be downloaded: every input
-is in this folder. Set `ALLOW_NETWORK=1` to allow connections.
+is in `Data/` (section 1). Set `ALLOW_NETWORK=1` to allow connections.
 
 Logs, `sessionInfo()` and the objects left in the workspace of each script are in
 `C:/AgingVsLSD_run/logs/`.
@@ -65,31 +119,35 @@ Logs, `sessionInfo()` and the objects left in the workspace of each script are i
 **Verification of the input RData** (`C:/AgingVsLSD_run/comparison/data_preparation_verification.csv`):
 one row per object of the rebuilt input RData files, with the dimensions, whether row and
 column names are the same, and the largest absolute difference between the rebuilt and
-the deposited object (section 10).
+the deposited object (section 11).
 
-## 2. Folder layout
+## 3. Folder layout
+
+Code (GitHub) and data (Zenodo, section 1):
 
 | Folder or file | Content |
 |---|---|
-| `run_all.R`, `Scripts/Reproducibility/install_environment.R` | the two commands of section 1 |
-| `Data/original_RData_notclosed/` | the four input RData files used for the paper, deposited as intermediate files: `Alldata_20Sep.RData`, `ExerciseAndAlcohol.RData`, `Dementia_alldata_meta.RData` unchanged, `Psychedelics_PFC.RData` without the raw tables of the non-public datasets (section 4); the `verify` step compares the rebuilt files with them. Also the other distributed intermediate files (section 7) |
-| `Data/raw_data_notclosed/` | public data: raw data of the data preparation (four subfolders) and the other inputs of the analysis scripts (section 3) |
-| `Data/intermediate_RData/` | outputs of the main pipeline read by the threshold-sensitivity analyses (section 7) |
-| `Data/homologs/` | human-rat and human-mouse homolog tables |
+| `run_all.R`, `Scripts/Reproducibility/install_environment.R` | the two commands of section 2 |
+| `Data/original_RData_notclosed/` | the four input RData files used for the paper, deposited as intermediate files: `Alldata_20Sep.RData`, `ExerciseAndAlcohol.RData`, `Dementia_alldata_meta.RData` unchanged, `Psychedelics_PFC.RData` without the raw tables of the non-public datasets (section 5); the `verify` step compares the rebuilt files with them. Also the other distributed intermediate files (section 8) |
+| `Data/raw_data_notclosed/` | public data: raw data of the data preparation (four subfolders) and the other inputs of the analysis scripts (section 4) |
+| `Data/intermediate_RData/` | outputs of the main pipeline read by the threshold-sensitivity analyses (section 8) |
+| `Data/homologs/` | human-rat (Ensembl 105) and human-mouse (Ensembl 107) homolog tables, exported from BioMart |
 | `Data/ensembl/` | Ensembl ID-symbol tables of releases 105, 107 and 115 |
-| `Data/closed_data_intermediate/` | `MSBB_gene_correlations.RData`, read by `13_AD_validation.R` without the MSBB data (section 4) |
+| `Data/closed_data_intermediate/` | `MSBB_gene_correlations.RData`, read by `13_AD_validation.R` without the MSBB data (section 5) |
 | `Scripts/` | the analysis scripts and `utilities.R` |
 | `Scripts/data_preparation/` | the scripts that build the four input RData files |
-| `Scripts/Reproducibility/` | the pipeline runner (`run_pipeline.R`, `run_script.R`), the installation of the R libraries (`install_environment.R`), the verification of the input RData (`verify_data_preparation.R`), the script that made `Data/original_RData_notclosed/` (`make_notclosed_RData.R`, not part of the pipeline), the public release (`make_public_release.R`), the Ensembl release check (`check_ensembl_releases.R`) |
+| `Scripts/Reproducibility/` | the pipeline runner (`run_pipeline.R`, `run_script.R`), the installation of the R libraries (`install_environment.R`), the verification of the input RData (`verify_data_preparation.R`), the script that made `Data/original_RData_notclosed/` (`make_notclosed_RData.R`, not part of the pipeline), the Ensembl release check (`check_ensembl_releases.R`) |
 | `Data/envs/` | the R library of each script (`environments.csv`) and the package versions of each library (`*_versions.csv`) |
 | `Data/packages/` | all R packages, for the offline installation |
+| `Data/raw_data_closed/` | not distributed: the place for the non-public raw data, if available (section 5) |
+| `Threshold_sensitivity/`, `Threshold_sensitivity_invivo/` | sensitivity of APR, CRB (Fig 1E-F) and of the in vivo LSD results (Fig 2B-D, Tables S15-S18) to the gene-selection threshold (own README in each folder). For now they need the complete input RData of `Data/original_RData/`, which are not distributed |
 
 The scripts read these paths directly (for example
 `Data/original_RData_notclosed/Alldata_20Sep.RData`, `Data/homologs/Human rat homologs.txt`,
 `Data/raw_data_notclosed/Invivo RNAseq/`). `run_all.R` links the folders of `Data/` (except
 `original_RData/` and `packages/`) into `<run_dir>/Data/`.
 
-## 3. Input data
+## 4. Input data
 
 **Raw data of the data preparation** (subfolders of `Data/raw_data_notclosed/`):
 
@@ -104,7 +162,16 @@ The GEO files were downloaded in 2022-2024. GEO updates the platform annotation
 files: newer downloads give slightly different gene symbols.
 
 **Other inputs of the analysis scripts** (`Data/raw_data_notclosed/`, unless stated):
-- homolog tables (`Data/homologs/`: `Human rat homologs.txt`, `Human mouse homologs.txt`);
+- homolog tables (`Data/homologs/`), exported from the Ensembl BioMart web site (dataset
+  Human genes, GRCh38.p13; attributes Gene stable ID, rat or mouse gene name, Gene name;
+  one row per human gene and homolog, human genes without a homolog included):
+  - `Human rat homologs.txt` (comma-separated): **Ensembl 105**, exported in March 2022;
+  - `Human mouse homologs.txt` (tab-separated): **Ensembl 107**, exported in August 2022.
+
+  The release was identified by comparing the human genes with the Ensembl BioMart dumps
+  in `Data/ensembl/`: the 68,005 human genes of the rat table are exactly those of release
+  105, with the same gene names, and the 68,324 of the mouse table exactly those of
+  release 107;
 - GTEx v8 (dbGaP phs000424.v8, release 2017-06-05): open-access files of the GTEx
   portal, `gene_reads_2017-06-05_v8_brain_frontal_cortex_ba9.gct.gz` and the two
   `GTEx_Analysis_v8_Annotations_*` files;
@@ -119,7 +186,7 @@ files: newer downloads give slightly different gene symbols.
   `08_2_random_drugs.R`, prepared from the LINCS data with the clue.io API
   (`CMAP_NPC_mean.RData`, `compounds_NPC.RData`).
 
-**Non-public data**: MDMA, DMT, pharmahuasca, harmaline and MSBB (section 4).
+**Non-public data**: MDMA, DMT, pharmahuasca, harmaline and MSBB (section 5).
 
 **Ensembl releases.** Ensembl gene IDs are mapped to gene symbols with the tables in
 `Data/ensembl/`, taken from the permanent BioMart dumps on the Ensembl FTP site
@@ -132,15 +199,16 @@ tables of the original analyses with each release (identical pair by pair;
 |---|---|
 | aging datasets with Ensembl IDs (GSE101521, GSE59288_H, GSE64810, GSE102741, GSE174409) | 105 (Dec 2021) |
 | GTEx_PFC, psychedelics (mouse, rat), exercise (GSE111273) | 107 (Jul 2022) |
+| homolog tables: human-rat / human-mouse | 105 (Dec 2021) / 107 (Jul 2022) |
 | analysis scripts `00_GTEx_filt` (Fig S16), `05` (mouse), `09` (rat GSE75772), `13` (MSBB) | 115 (Sep 2025) |
 
 **Probe annotation.** Microarray gene symbols come from the GPL annotation files in
 `Data/raw_data_notclosed/`. The MDMA arrays use `org.Mm.eg.db` 3.14.0 with `mouse4302.db` 3.13.0
 (later versions rename a few hundred genes).
 
-## 4. Non-public data
+## 5. Non-public data
 
-Three datasets used in the paper are not distributed with this folder: they do not
+Three datasets used in the paper are not distributed (neither on GitHub nor on Zenodo): they do not
 belong to the authors of this work, or are controlled-access data. The pipeline does
 not need them: it uses their DE tables (`Data/original_RData_notclosed/Psychedelics_PFC.RData`)
 and the MSBB gene correlations (`Data/closed_data_intermediate/`), computed from them
@@ -150,7 +218,7 @@ for the paper.
 |---|---|---|---|
 | MDMA, mouse PFC, Affymetrix Mouse 430 2.0 (`PF1.CEL`-`PF9.CEL`) | Fernàndez-Castillo et al. 2012, *Genes Brain Behav* 11, 38-51 (Table S5) | not deposited in public repositories: request it from the authors of the study | `Data/raw_data_closed/psychedelics/MDMA data/PREFRONTAL CORTEX/` |
 | DMT, pharmahuasca, harmaline, rat PFC, RNA-seq read counts (one table, 16 samples) | Kelley et al. 2022, *ACS Chem. Neurosci.* 13, 257-274 (Table S5) | not deposited in public repositories: request it from the authors of the study | `Data/raw_data_closed/psychedelics/readcount copy 2.xlsx` |
-| MSBB (Mount Sinai Brain Bank) RNA-seq: `MSBB_Normalized_counts_(CQN).tsv`, `RNAseq_Harmonization_MSBB_combined_metadata.csv` | AD Knowledge Portal, RNAseq Harmonization study (Synapse `syn21241740`): `MSBB_Normalized_counts_(CQN).tsv` = `syn27068756` version 1 (MD5 `4665daf23145048d0daecf113d6f9fdb`), `RNAseq_Harmonization_MSBB_combined_metadata.csv` = `syn27000243` version 2 (MD5 `e225b3396859528f1a9a6eea2927b8a7`, same content as version 1); downloaded on 9 January 2023, MD5 checked against Synapse | controlled access: request access through the AD Knowledge Portal (https://adknowledgeportal.synapse.org) | `Data/AD portal/` |
+| MSBB (Mount Sinai Brain Bank) RNA-seq: `MSBB_Normalized_counts_(CQN).tsv`, `RNAseq_Harmonization_MSBB_combined_metadata.csv` | AD Knowledge Portal, RNAseq Harmonization study (Synapse `syn21241740`): `MSBB_Normalized_counts_(CQN).tsv` = `syn27068756` version 1 (MD5 `4665daf23145048d0daecf113d6f9fdb`), `RNAseq_Harmonization_MSBB_combined_metadata.csv` = `syn27000243` version 2 (MD5 `e225b3396859528f1a9a6eea2927b8a7`, same content as version 1); downloaded on 9 January 2023, MD5 checked against Synapse | controlled access: request access through the AD Knowledge Portal (https://adknowledgeportal.synapse.org) | `Data/raw_data_closed/AD portal/` |
 
 The processing of these data is described in the Methods of the paper (MDMA, DMT,
 pharmahuasca, harmaline: "Comparing the aging-signature-opposition/-concordance of
@@ -178,12 +246,12 @@ its results are the same as with the complete original file.
 With the non-public raw data in the folders above, `prepare` also rebuilds the four DE
 tables and `verify` compares them with the deposited ones.
 
-## 5. Data preparation: the four input RData files
+## 6. Data preparation: the four input RData files
 
 | File | Content | Script (`Scripts/data_preparation/`) |
 |---|---|---|
 | `Alldata_20Sep.RData` | human aging datasets (expression matrices, incl. `GTEx_PFC`) + `metadata` | `prep_01a_aging_expression.R`, `prep_01b_aging_metadata_Alldata_20Sep.R` |
-| `Psychedelics_PFC.RData` | DE tables of psychedelics and antidepressants in PFC + LSD counts (MDMA, DMT, pharmahuasca, harmaline only with the non-public raw data, section 4) | `prep_02_Psychedelics_PFC.R` |
+| `Psychedelics_PFC.RData` | DE tables of psychedelics and antidepressants in PFC + LSD counts (MDMA, DMT, pharmahuasca, harmaline only with the non-public raw data, section 5) | `prep_02_Psychedelics_PFC.R` |
 | `ExerciseAndAlcohol.RData` | DE tables of exercise, enriched environment and alcohol | `prep_03_ExerciseAndAlcohol.R` |
 | `Dementia_alldata_meta.RData` | human dementia datasets + `metadata` | `prep_04_Dementia_alldata_meta.R` |
 
@@ -198,14 +266,14 @@ The original files were produced in 2022 by interactive scripts (RStudio workspa
 the scripts in `Scripts/data_preparation/` rewrite that code with the same
 processing. The rebuilt files contain only the objects read by the analysis scripts.
 The `verify` step compares them with the deposited files of `Data/original_RData_notclosed/`
-(section 10). These lack only the raw MDMA and DMT tables, which are never rebuilt, so
+(section 11). These lack only the raw MDMA and DMT tables, which are never rebuilt, so
 every rebuilt object is compared.
 
-## 6. Analysis scripts
+## 7. Analysis scripts
 
 `Scripts/Reproducibility/run_pipeline.R` runs the scripts in three layers; the scripts of a
 layer run in parallel, each in its own R session (`Scripts/Reproducibility/run_script.R`),
-with the R library given in `Data/envs/environments.csv` (section 8).
+with the R library given in `Data/envs/environments.csv` (section 9).
 
 | Layer | Script | Main results |
 |---|---|---|
@@ -233,7 +301,7 @@ with the R library given in `Data/envs/environments.csv` (section 8).
 
 (*) Without the non-public raw data, these scripts read the DE tables of MDMA, DMT,
 pharmahuasca and harmaline from `Data/original_RData_notclosed/Psychedelics_PFC.RData`
-(section 4).
+(section 5).
 
 Not run by the pipeline: `08_1_cMAP_data.R`, which prepares `Data/original_RData_notclosed/cmap/` from the
 LINCS data and needs a personal clue.io API key.
@@ -241,10 +309,10 @@ LINCS data and needs a personal clue.io API key.
 The scripts start with `setwd("workdir")`: `run_script.R` turns it into a no-op and
 runs each script in the run folder, which contains `Data/` (links) and `Results/`.
 
-## 7. Intermediate files
+## 8. Intermediate files
 
 **Written by the pipeline** (in the run folder):
-- `rebuilt_RData/*.RData`: the four input RData files rebuilt by `prepare` (section 5),
+- `rebuilt_RData/*.RData`: the four input RData files rebuilt by `prepare` (section 6),
   used only by `verify`;
 - `Results/RData/`: objects passed between scripts, for example `DE_GSE179379.RData`
   (from `00_LSD_DEGs`), `fgsea_res*.RData` (GSEA results of `03`, `09`, `08_2`),
@@ -253,23 +321,23 @@ runs each script in the run folder, which contains `Data/` (links) and `Results/
 - `Results/*.xlsx`: the tables.
 
 **Distributed with the data** (`Data/original_RData_notclosed/`, unless stated):
-- `cmap/`: the CMap input (section 3), copied to `Results/RData/` by the pipeline;
+- `cmap/`: the CMap input (section 4), copied to `Results/RData/` by the pipeline;
 - `Data/intermediate_RData/`: outputs of the main pipeline read by
   `Threshold_sensitivity/` and `Threshold_sensitivity_invivo/`, which run from the
   repository root without the main pipeline (same content as the files of a full run):
   `DE_GSE179379.RData` (`00_LSD_DEGs.R`), `gsea_GO.RData` and `genes_cor.RData`
   (`06_GO_aging.R`);
 - `seeded_intermediate/fgsea_res_drugs_RAW.RData`: the CMap GSEA of
-  `08_2_random_drugs.R` with `set.seed(1234)` (section 9), as a reference copy;
+  `08_2_random_drugs.R` with `set.seed(1234)` (section 10), as a reference copy;
 - `clusterProfiler_cache_2022.rds`: the annotation caches of clusterProfiler used by
-  `19_GO_revert_dementia.R` (section 8);
+  `19_GO_revert_dementia.R` (section 9);
 - `Data/original_RData_notclosed/rng_states.rds`: the random states read by the scripts
-  (section 9);
+  (section 10);
 - `Data/closed_data_intermediate/MSBB_gene_correlations.RData`: the MSBB gene correlations,
-  read by `13_AD_validation.R` (section 4);
-- the four input RData files of the paper (section 4).
+  read by `13_AD_validation.R` (section 5);
+- the four input RData files of the paper (section 5).
 
-## 8. R environments
+## 9. R environments
 
 R 4.5 with Bioconductor 3.21 software (`Data/packages/offline_repo_R4.5_windows`). Main
 versions:
@@ -295,11 +363,11 @@ The analyses were run at different times, with different versions of a few packa
 | Library | Content | Scripts | Why |
 |---|---|---|---|
 | `base` | Bioconductor 3.21 software and annotations (`org.*.eg.db`, `GO.db` 3.21.0) | all others | |
-| `prep` | `org.Mm.eg.db` 3.14.0, `mouse4302.db` 3.13.0, array-reading packages | data preparation | MDMA arrays (section 3) |
+| `prep` | `org.Mm.eg.db` 3.14.0, `mouse4302.db` 3.13.0, array-reading packages | data preparation | MDMA arrays (section 4) |
 | `ann322` | `AnnotationDbi` 1.72.0 + `org.Hs/Mm/Rn.eg.db`, `GO.db` 3.22.0 | `save_mean_logFC_selected_genes.R`, `16_invitro_RNAseq.R` | gene annotation of Bioconductor 3.22 |
 | `ann322_orgMm321` | as `ann322`, with `org.Mm.eg.db` 3.21.0 | `19_GO_revert_dementia.R` | as above; mouse annotation of 3.21 |
 | `ggplot2_35` | `ggplot2` 3.5.2 + `ggrepel` 0.9.6 built against ggplot2 3.5 | `01_aging_metanalysis.R`, `05_DEvsAging_validation.R`, `12_dementia_cohen.R` | figures drawn with ggplot2 3.5 (theme, histogram bins) |
-| `factominer212` | `FactoMineR` 2.12 | `04_integrated_dataset.R` | random numbers (section 9) |
+| `factominer212` | `FactoMineR` 2.12 | `04_integrated_dataset.R` | random numbers (section 10) |
 
 Notes:
 - The 3.22 annotation packages need `AnnotationDbi` >= 1.71.1, which is why the
@@ -321,7 +389,7 @@ Notes:
   the 2022 annotations. `19` restores them from `Data/original_RData_notclosed/clusterProfiler_cache_2022.rds`
   (extracted from that workspace) after its `load()` calls.
 
-## 9. Random numbers
+## 10. Random numbers
 
 **Random states.** The original input RData files were RStudio workspace images that
 contained `.Random.seed`, and each `load()` reset the generator to the state saved in
@@ -330,7 +398,7 @@ the file. These states are in `Data/original_RData_notclosed/rng_states.rds` (a 
 scripts set them explicitly right after the `load()`:
 
 ```r
-load("Data/Alldata_20Sep.RData")
+load("Data/original_RData_notclosed/Alldata_20Sep.RData")
 assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)
 ```
 
@@ -353,7 +421,7 @@ The rebuilt input RData therefore do not need `.Random.seed`.
   sets the state, or between that line and the GSEA.
 - Attaching `clusterProfiler` draws one random number: in `19` it is attached before
   the `load()` calls, in `14` after the line that sets the state.
-- The results are reproduced exactly only with the package versions of section 8.
+- The results are reproduced exactly only with the package versions of section 9.
   A newer version of a package can draw random numbers where the old one did not, and
   then every later GSEA changes. Example: `FactoMineR` 2.18 draws random numbers in
   `PCA()` and changes the p-values and NES of Fig 1A; `04` therefore runs with
@@ -364,7 +432,7 @@ The rebuilt input RData therefore do not need `.Random.seed`.
 the jittered points and repelled labels change from run to run; the plotted data do
 not.
 
-## 10. Numerical precision
+## 11. Numerical precision
 
 The input RData rebuilt from the raw data agree with the original ones within
 numerical precision:
