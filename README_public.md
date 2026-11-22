@@ -353,8 +353,11 @@ The rebuilt input RData therefore do not need `.Random.seed`.
   sets the state, or between that line and the GSEA.
 - Attaching `clusterProfiler` draws one random number: in `19` it is attached before
   the `load()` calls, in `14` after the line that sets the state.
-- Package versions that draw random numbers in other functions change the results
-  (example: `FactoMineR`, section 8).
+- The results are reproduced exactly only with the package versions of section 8.
+  A newer version of a package can draw random numbers where the old one did not, and
+  then every later GSEA changes. Example: `FactoMineR` 2.18 draws random numbers in
+  `PCA()` and changes the p-values and NES of Fig 1A; `04` therefore runs with
+  `FactoMineR` 2.12 (library `factominer212`), which reproduces them.
 
 **Graphics.** Some figures use `geom_jitter()`, `position_jitter()` or
 `geom_text_repel()` without a seed (`05`, `09`, `12`, `16`, `20`, `21`, `Cumulative_logFC`): the positions of
