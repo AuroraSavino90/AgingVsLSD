@@ -183,7 +183,7 @@ files: newer downloads give slightly different gene symbols.
   and platform tables (`GPL5175.soft.gz`, `GPL6947.annot.gz`);
 - `ACEL-17-e12819-s002.csv`;
 - `cmap/` (in `Data/original_RData_notclosed/`): CMap (LINCS) input of
-  `08_2_random_drugs.R`, prepared from the LINCS data with the clue.io API
+  `08_2_random_drugs.R`, prepared by `08_1_cMAP_data.R` from the local LINCS gctx file
   (`CMAP_NPC_mean.RData`, `compounds_NPC.RData`).
 
 **Non-public data**: MDMA, DMT, pharmahuasca, harmaline and MSBB (section 5).
@@ -304,7 +304,8 @@ pharmahuasca and harmaline from `Data/original_RData_notclosed/Psychedelics_PFC.
 (section 5).
 
 Not run by the pipeline: `08_1_cMAP_data.R`, which prepares `Data/original_RData_notclosed/cmap/` from the
-LINCS data and needs a personal clue.io API key.
+LINCS gctx file of GSE70138 (`Data/raw_data_notclosed/`, 17 GB; rhdf5, no clue.io key or internet).
+It is optional: on 22/11/2026 it rebuilt both files identically (`identical()` on the objects).
 
 The scripts start with `setwd("workdir")`: `run_script.R` turns it into a no-op and
 runs each script in the run folder, which contains `Data/` (links) and `Results/`.
