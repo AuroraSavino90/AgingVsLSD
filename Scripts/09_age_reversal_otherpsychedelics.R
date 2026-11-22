@@ -11,7 +11,7 @@ library(ggrepel)
 load("Data/original_RData_notclosed/ExerciseAndAlcohol.RData")
 load("Data/original_RData_notclosed/Psychedelics_PFC.RData")
 load("Data/original_RData_notclosed/Alldata_20Sep.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
+assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
 source("Scripts/utilities.R")
 rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt")
 mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
@@ -495,7 +495,7 @@ genes_dn<-unique(homologs[which(homologs[,2] %in% genes_dn),3])
 # (September 2025) that started from the random state saved in Data/original_RData_notclosed/Alldata_20Sep.RData advanced by
 # 1559 uniform draws (found by search, see README.md, "Random numbers"). The GSEA of the other interventions
 # above keep the state set after load().
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv); invisible(runif(1559))
+assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv); invisible(runif(1559))
 genes_cor<-genes_cor[!unlist(lapply(genes_cor, is.null))]
 fgsea_res<-list()
 p<-list()

@@ -31,7 +31,7 @@ load("Data/original_RData_notclosed/Psychedelics_PFC.RData")
 load("Data/original_RData_notclosed/Alldata_20Sep.RData")
 load("Data/original_RData_notclosed/ExerciseAndAlcohol.RData")
 load("Data/original_RData_notclosed/Dementia_alldata_meta.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Dementia_alldata_meta.RData), set explicitly
+assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Dementia_alldata_meta.RData), set explicitly
 # clusterProfiler keeps its annotation caches in .GlobalEnv and reuses them instead of org.Rn.eg.db
 # and GO.db: .GO_clusterProfiler_Env (rat gene-GO table, SYMBOL, BP), .GOTERM_Env (GO term table)
 # and .Anno_clusterProfiler_Env. The original Data/original_RData_notclosed/ExerciseAndAlcohol.RData workspace (saved

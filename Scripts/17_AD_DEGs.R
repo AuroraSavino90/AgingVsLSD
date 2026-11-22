@@ -14,7 +14,7 @@ Abeta_genes_dn<-unique(mouse_homologs[which(mouse_homologs[,2] %in% Abeta_genes_
 
 
 load("Data/original_RData_notclosed/Dementia_alldata_meta.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Dementia_alldata_meta.RData), set explicitly
+assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Dementia_alldata_meta, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Dementia_alldata_meta.RData), set explicitly
 
 region<-"DLPFC"
 diagnosis<-c("Healthy", "Alzheimer")

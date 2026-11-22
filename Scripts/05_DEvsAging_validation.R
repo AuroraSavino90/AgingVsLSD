@@ -9,7 +9,7 @@ library(DESeq2)
 source("Scripts/utilities.R")
 
 # 15 samples deposited in GEO (GSE263662): cohorts C1-C3, one mouse per dose (0, 50, 100, 200, 500 ug/kg) per cohort
-meta<-read.xlsx("Data/raw_data_notclosed/Samples_LSD.xlsx",1)
+meta<-read.xlsx("Data/raw_data_notclosed/Invivo RNAseq/Samples_LSD.xlsx",1)
 meta$dose[meta$dose=="ctrl"]<-0
 
 #load counts (two lanes per sample, files ordered as the samples in meta)
@@ -62,7 +62,7 @@ library(fgsea)
 library(ggrepel)
 
 load("Data/original_RData_notclosed/Alldata_20Sep.RData")
-assign(".Random.seed", readRDS("Reproducibility/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
+assign(".Random.seed", readRDS("Data/original_RData_notclosed/rng_states.rds")$Alldata_20Sep, envir = .GlobalEnv)  # random state of the published runs (the .Random.seed saved in Data/original_RData_notclosed/Alldata_20Sep.RData), set explicitly
 rat_homologs<-read.csv("Data/homologs/Human rat homologs.txt", sep="\t")
 mouse_homologs<-read.csv("Data/homologs/Human mouse homologs.txt", sep="\t")
 
