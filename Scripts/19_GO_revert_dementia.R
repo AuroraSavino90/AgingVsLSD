@@ -407,8 +407,6 @@ df_opp_dem <- bind_rows(
   mutate(FDR_DementiaOpp = clamp01(FDR_DementiaOpp)) %>%
   arrange(OppositePattern, FDR_DementiaOpp)
 
-write.csv(df_opp_dem, file=file.path(outdir_inv, "GO_opposite_LSD_vs_Dementia.csv"), row.names=FALSE)
-saveRDS(df_opp_dem,  file=file.path(outdir_inv, "GO_opposite_LSD_vs_Dementia.rds"))
 
 
 desc2go <- bind_rows(
@@ -420,7 +418,6 @@ df_opp_dem <- df_opp_dem %>%
   left_join(desc2go, by="Description") %>%
   rename(GO_ID = ID)
 
-write.csv(df_opp_dem, file=file.path(outdir_inv, "GO_opposite_LSD_vs_Dementia_with_GOIDs.csv"), row.names=FALSE)
 
 go_ids <- unique(na.omit(df_opp_dem$GO_ID))
 genesets_goid <- goid_to_genesets_mouse(go_ids)
@@ -431,7 +428,6 @@ genesets_desc <- genesets_goid[names(genesets_goid) %in% names(desc_by_go)]
 names(genesets_desc) <- desc_by_go[names(genesets_desc)]
 genesets_desc <- genesets_desc[lengths(genesets_desc) >= 10]
 
-saveRDS(genesets_desc, file=file.path(outdir_inv, "genesets_opposite_GO_desc_mouse.rds"))
 
 # -----------------------------
 # Load in vitro RNA-seq
@@ -484,16 +480,6 @@ tab_camera <- cam %>%
 write.csv(tab_camera, file=file.path(outdir_inv, "camera_AbetaLSD_vs_Abeta.csv"), row.names=FALSE)
 write.xlsx(tab_camera, file=file.path(outdir_inv, "camera_AbetaLSD_vs_Abeta.xlsx"), row.names=FALSE)
 
-# -----------------------------
-# Merge + save
-# -----------------------------
-merged_dem <- 
-  tab_camera %>% transmute(Description, camera_Dir=Direction, camera_P=PValue, camera_FDR=FDR, camera_NGenes=NGenes) %>%
-  left_join(df_opp_dem %>% select(OppositePattern, Description, GO_ID, FDR_DementiaOpp), by="Description") %>%
-  arrange(camera_FDR)
-
-write.csv(merged_dem, file=file.path(outdir_inv, "Merged_camera_oppositeGO_LSD_vs_Dementia.csv"), row.names=FALSE)
-saveRDS(merged_dem,  file=file.path(outdir_inv, "Merged_camera_oppositeGO_LSD_vs_Dementia.rds"))
 
 
 
@@ -514,19 +500,6 @@ plot_block <- function(term_q, prefix, lsd_pmeta_vec) {
    ord <- order(-log10(term_q[sel]), decreasing = TRUE)
   mat <- mat[sel[ord], , drop=FALSE]
   
-  pal <- make_div_breaks(mat, paletteLength = 50)
-  
-  anno <- data.frame(Dementia_meta = -log10(term_q[rownames(mat)]))
-  rownames(anno) <- rownames(mat)
-  
-  pdf(file.path("Results/Figures", paste0(prefix, "_GO_shared.pdf")),
-      width = 16, height = max(8, 0.25*nrow(mat)))
-  pheatmap(mat,
-           cluster_cols = FALSE, cluster_rows = FALSE,
-           cellwidth = 12, cellheight = 12,
-           breaks = pal$breaks, color = pal$color,
-           annotation_row = anno)
-  dev.off()
   
   # top20 by combined evidence: (-log10 LSD meta) + (-log10 dementia meta)
   common <- intersect(rownames(mat), names(lsd_pmeta_vec))
@@ -548,22 +521,6 @@ plot_block <- function(term_q, prefix, lsd_pmeta_vec) {
            annotation_row = anno2)
   dev.off()
   
-  # scatter: x = -log10(FDR_LSD_meta), y = -log10(FDR_dementia_directional_meta)
-  df_sc <- data.frame(
-    x = -log10(lsd_pmeta_vec[rownames(mat)]),
-    y = -log10(term_q[rownames(mat)]),
-    term = rownames(mat)
-  )
-  
-  pdf(file.path("Results/Figures", paste0(prefix, "_LSDvsDementia_scatter.pdf")), 7, 7)
-  print(
-    ggplot(df_sc, aes(x = x, y = y, label = term)) +
-      geom_point() +
-      geom_label_repel(label.size = 0.15, max.overlaps = 30) +
-      theme_classic() +
-      labs(x = "-log10(FDR LSD meta)", y = "-log10(FDR Dementia directional meta)")
-  )
-  dev.off()
   
   invisible(list(shared=rownames(mat), top20=rownames(mat2)))
 }

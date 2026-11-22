@@ -149,8 +149,6 @@ rownames(cor_age_tot)<-allgenes
 cor_age_tot[rownames(cor_DLPFC), colnames(cor_DLPFC)]<-cor_DLPFC
 cor_age_tot[rownames(cor_mPFC), colnames(cor_mPFC)]<-cor_mPFC
 
-hist(rowSums(cor_age_tot>0, na.rm=T))
-hist(rowSums(cor_age_tot<0, na.rm=T))
 
 age_up<-rownames(cor_age_tot)[rowSums(cor_age_tot>0, na.rm=T)>=16]
 age_dn<-rownames(cor_age_tot)[rowSums(cor_age_tot<0, na.rm=T)>=16]
@@ -158,26 +156,8 @@ age_dn<-rownames(cor_age_tot)[rowSums(cor_age_tot<0, na.rm=T)>=16]
 write.csv(age_up, file="Results/age_up_all.csv")
 write.csv(age_dn, file="Results/age_dn_all.csv")
 
-toplot<-cor_age_tot[age_up,]
-paletteLength <- 50
-myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
-myBreaks <- c(seq(min(unlist(toplot), na.rm=T), 0, length.out=ceiling(paletteLength/2) + 1),
-              seq(max(unlist(toplot), na.rm=T)/paletteLength, max(unlist(toplot), na.rm=T), length.out=floor(paletteLength/2)))
-length(myBreaks) == length(paletteLength) + 1
-
-pheatmap(t(toplot),   cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T)
-
-toplot<-cor_age_tot[age_dn,]
-paletteLength <- 50
-myColor <- colorRampPalette(c("blue", "white", "red"))(paletteLength)
-myBreaks <- c(seq(min(unlist(toplot), na.rm=T), 0, length.out=ceiling(paletteLength/2) + 1),
-              seq(max(unlist(toplot), na.rm=T)/paletteLength, max(unlist(toplot), na.rm=T), length.out=floor(paletteLength/2)))
-length(myBreaks) == length(paletteLength) + 1
-
-pheatmap(t(toplot),   cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor, keep.dendro=T)
 
 cor_datasets<-cor(cor_age_tot, method="s", use="pairwise.complete.obs")
-hist(cor_datasets[upper.tri(cor_datasets)], breaks=20)
 
 
 paletteLength <- 50
@@ -281,8 +261,6 @@ rownames(cor_age_tot)<-allgenes
 cor_age_tot[rownames(cor_DLPFC), colnames(cor_DLPFC)]<-cor_DLPFC
 cor_age_tot[rownames(cor_mPFC), colnames(cor_mPFC)]<-cor_mPFC
 
-hist(rowSums(cor_age_tot>0, na.rm=T))
-hist(rowSums(cor_age_tot<0, na.rm=T))
 
 age_up<-rownames(cor_age_tot)[rowSums(cor_age_tot>0, na.rm=T)>=14]
 age_dn<-rownames(cor_age_tot)[rowSums(cor_age_tot<0, na.rm=T)>=14]

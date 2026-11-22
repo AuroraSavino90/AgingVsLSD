@@ -205,16 +205,6 @@ length(myBreaks) == length(paletteLength) + 1
 pheatmap(forheat[,order(forheat[1,], decreasing = T)], cluster_cols = F,  cellwidth=15, cellheight=15, breaks=myBreaks, color = myColor)
 
 
-df<-data.frame(cohen=c(cohen_up, cohen_dn), direction=rep(c("up with drug", "dn with drug"), each=length(cohen_up)),
-               pval= -log10(c(p_up, p_dn)),
-               disease=rep(c("AD", "AD", "AD", "AD", "AD", "HD", "PDD", "DLB"),2))
-
-gg<-ggplot(df, aes(x=cohen, y=pval, colour=direction))+geom_point()+theme_classic()+ labs(x = "Cohen's d", y = "-log10(pvalue)")+
-  geom_vline(xintercept=0, linetype='dashed', color='grey', size=0.5)+theme_classic()+scale_colour_manual(values=c("dn with drug"="blue", "up with drug"="red"))
-
-pdf("Results/Figures/dementia_LSD.pdf",5,5)
-print(gg)
-dev.off()
 
 
 library(metap)

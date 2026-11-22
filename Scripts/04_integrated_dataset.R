@@ -89,8 +89,6 @@ ggplot(df, aes(age, PC1, colour=dataset))+geom_point()+theme_classic()
 dev.off()
 
 df<-data.frame(PC1=pca$ind$coord[,1], PC2=pca$ind$coord[,2],PC3=pca$ind$coord[,3],PC4=pca$ind$coord[,4], age=age_all/365, dataset=dataset_all)
-ggplot(df, aes(PC1, PC4, colour=dataset))+geom_point()+theme_classic()
-ggplot(df, aes(PC1, PC4, colour=age))+geom_point()+theme_classic()
 
 
 batch = dataset_all
@@ -101,14 +99,6 @@ mod = model.matrix(~age_all, data=data.frame(alldata))
 mod0 = model.matrix(~1,data=data.frame(t(alldata)))
 n.sv = 8  # the published alldata_resid used 8 SVs (num.sv(..., method="leek") now returns 28)
 svobj = sva(as.matrix(alldata),mod,mod0,n.sv=n.sv)
-plot(age_all, svobj[[1]][,1], col=as.factor(dataset_all))
-plot(age_all, svobj[[1]][,2], col=as.factor(dataset_all))
-plot(age_all, svobj[[1]][,3], col=as.factor(dataset_all))
-plot(age_all, svobj[[1]][,4], col=as.factor(dataset_all))
-plot(age_all, svobj[[1]][,5], col=as.factor(dataset_all))
-plot(age_all, svobj[[1]][,6], col=as.factor(dataset_all))
-plot(age_all, svobj[[1]][,7], col=as.factor(dataset_all))
-plot(age_all, svobj[[1]][,8], col=as.factor(dataset_all))
 
 alldata_resid<-apply(alldata,1, function(x){residuals(lm(unlist(x)~svobj[[1]][,1:n.sv]))})
 #alldata_resid<-apply(alldata,1, function(x){residuals(lm(unlist(x)~svobj[[1]][,1]+svobj[[1]][,2]+svobj[[1]][,3]+svobj[[1]][,4]+svobj[[1]][,5]+svobj[[1]][,6]+svobj[[1]][,7]))})
@@ -123,7 +113,6 @@ pdf("Results/Figures/PCA_SVA_age.pdf",6,5)
 ggplot(df, aes(PC2, PC1, colour=age))+geom_point()+ scale_color_gradient(low = "orange", high = "blue")+theme_classic()
 dev.off()
 
-ggplot(df, aes(PC3, PC4, colour=age))+geom_point()
 
 pdf("Results/Figures/PC1_SVA_age.pdf",7,5)
 ggplot(df, aes(age, PC1, colour=dataset))+geom_point()+theme_classic()
@@ -565,29 +554,6 @@ knn_predictions <- res_knn$predictions
 
 
 ############################################################
-### 7. Save results
-############################################################
-
-save(
-  knn_perf,
-  knn_predictions,
-  file = "Results/RData/KNN_dataset_prediction.RData"
-)
-
-write.csv(
-  knn_perf,
-  "Results/KNN_dataset_prediction_performance.csv",
-  row.names = FALSE
-)
-
-write.csv(
-  knn_predictions,
-  "Results/KNN_dataset_prediction_predictions.csv",
-  row.names = FALSE
-)
-
-
-############################################################
 ### 8. Overall performance summary
 ############################################################
 
@@ -822,43 +788,6 @@ print(
 dev.off()
 
 
-############################################################
-### 14. Paired representation
-############################################################
-
-pdf(
-  "Results/Figures/KNN_dataset_prediction_paired.pdf",
-  width = 4,
-  height = 4
-)
-
-print(
-  ggplot(
-    perf_repeat,
-    aes(
-      x = data_type,
-      y = BalancedAccuracy,
-      group = rep_id
-    )
-  ) +
-    geom_hline(
-      yintercept = chance_balanced_accuracy,
-      linetype = "dashed"
-    ) +
-    geom_line(
-      alpha = 0.25
-    ) +
-    geom_point(
-      size = 1.5
-    ) +
-    theme_classic() +
-    labs(
-      x = NULL,
-      y = "Dataset prediction\nbalanced accuracy"
-    )
-)
-
-dev.off()
 
 
 ############################################################
@@ -875,50 +804,8 @@ colnames(dataset_perf)[3] <- "Accuracy"
 
 print(dataset_perf)
 
-write.csv(
-  dataset_perf,
-  "Results/KNN_dataset_specific_accuracy.csv",
-  row.names = FALSE
-)
 
 
-############################################################
-### 16. Dataset-specific figure
-############################################################
-
-pdf(
-  "Results/Figures/KNN_dataset_specific_accuracy.pdf",
-  width = 6,
-  height = max(
-    5,
-    0.3 * nlevels(y)
-  )
-)
-
-print(
-  ggplot(
-    dataset_perf,
-    aes(
-      x = Accuracy,
-      y = reorder(
-        dataset,
-        Accuracy
-      ),
-      shape = data_type
-    )
-  ) +
-    geom_point(
-      size = 2.5
-    ) +
-    theme_classic() +
-    labs(
-      x = "Dataset-specific prediction accuracy",
-      y = NULL,
-      shape = NULL
-    )
-)
-
-dev.off()
 
 
 ############################################################
@@ -947,15 +834,6 @@ cm_sva <- table(
 print(cm_raw)
 print(cm_sva)
 
-write.csv(
-  cm_raw,
-  "Results/KNN_confusion_matrix_before_correction.csv"
-)
-
-write.csv(
-  cm_sva,
-  "Results/KNN_confusion_matrix_after_SVA.csv"
-)
 
 
 ############################################################
@@ -1024,58 +902,6 @@ cat(
 cat("---------------------------------------------\n")
 
 
-perf_repeat <- aggregate(
-  cbind(
-    Accuracy,
-    BalancedAccuracy,
-    MacroF1
-  ) ~ rep_id + data_type,
-  data = knn_perf,
-  FUN = mean
-)
-
-ggplot(
-  perf_repeat,
-  aes(x = data_type, y = BalancedAccuracy)
-) +
-  geom_hline(
-    yintercept = 1 / nlevels(y),
-    linetype = "dashed"
-  ) +
-  geom_boxplot(
-    width = 0.5,
-    outlier.shape = NA
-  ) +
-  geom_point(
-    position = position_jitter(width = 0.06),
-    alpha = 0.6,
-    size = 1.5
-  ) +
-  theme_classic() +
-  labs(
-    x = NULL,
-    y = "Dataset prediction\nbalanced accuracy"
-  )
-
-ggplot(
-  perf_repeat,
-  aes(
-    x = data_type,
-    y = BalancedAccuracy,
-    group = rep_id
-  )
-) +
-  geom_hline(
-    yintercept = 1 / nlevels(y),
-    linetype = "dashed"
-  ) +
-  geom_line(alpha = 0.3) +
-  geom_point(size = 1.7) +
-  theme_classic() +
-  labs(
-    x = NULL,
-    y = "Dataset prediction\nbalanced accuracy"
-  )
 
 
 ############################################################
@@ -1779,42 +1605,6 @@ cat(
 )
 
 
-############################################################
-### 13. Save results
-############################################################
-
-write.csv(
-  vp_raw,
-  "Results/variance_components_per_gene_before_SVA.csv",
-  row.names = FALSE
-)
-
-write.csv(
-  vp_sva,
-  "Results/variance_components_per_gene_after_SVA.csv",
-  row.names = FALSE
-)
-
-write.csv(
-  summary_gene,
-  "Results/variance_components_gene_summary.csv",
-  row.names = FALSE
-)
-
-write.csv(
-  global_summary,
-  "Results/variance_components_global_summary.csv",
-  row.names = FALSE
-)
-
-save(
-  vp_raw,
-  vp_sva,
-  summary_gene,
-  global_summary,
-  file =
-    "Results/RData/variance_partition_age_dataset.RData"
-)
 
 
 ############################################################
@@ -1907,172 +1697,8 @@ print(
 dev.off()
 
 
-############################################################
-### 16. Dataset variance:
-### each gene before vs after SVA
-############################################################
-
-dataset_scatter <- data.frame(
-  Gene = vp_raw$Gene,
-  Before = vp_raw$Dataset_unique,
-  After = vp_sva$Dataset_unique
-)
 
 
-pdf(
-  "Results/Figures/variance_dataset_gene_before_vs_after_SVA.pdf",
-  width = 5,
-  height = 5
-)
-
-print(
-  ggplot(
-    dataset_scatter,
-    aes(
-      x = Before * 100,
-      y = After * 100
-    )
-  ) +
-    geom_point(
-      size = 0.5,
-      alpha = 0.15
-    ) +
-    geom_abline(
-      slope = 1,
-      intercept = 0,
-      linetype = "dashed"
-    ) +
-    theme_classic() +
-    labs(
-      x =
-        "Dataset-associated variance before SVA (%)",
-      y =
-        "Dataset-associated variance after SVA (%)"
-    )
-)
-
-dev.off()
 
 
-############################################################
-### 17. Age variance:
-### each gene before vs after SVA
-############################################################
-
-age_scatter <- data.frame(
-  Gene = vp_raw$Gene,
-  Before = vp_raw$Age_unique,
-  After = vp_sva$Age_unique
-)
-
-
-pdf(
-  "Results/Figures/variance_age_gene_before_vs_after_SVA.pdf",
-  width = 5,
-  height = 5
-)
-
-print(
-  ggplot(
-    age_scatter,
-    aes(
-      x = Before * 100,
-      y = After * 100
-    )
-  ) +
-    geom_point(
-      size = 0.5,
-      alpha = 0.15
-    ) +
-    geom_abline(
-      slope = 1,
-      intercept = 0,
-      linetype = "dashed"
-    ) +
-    theme_classic() +
-    labs(
-      x =
-        "Age-associated variance before SVA (%)",
-      y =
-        "Age-associated variance after SVA (%)"
-    )
-)
-
-dev.off()
-
-
-############################################################
-### 18. Compact global figure
-############################################################
-
-global_plot <- rbind(
-  
-  data.frame(
-    Correction = "Before correction",
-    Component = "Dataset",
-    Variance =
-      global_raw$Dataset_unique * 100
-  ),
-  
-  data.frame(
-    Correction = "After SVA",
-    Component = "Dataset",
-    Variance =
-      global_sva$Dataset_unique * 100
-  ),
-  
-  data.frame(
-    Correction = "Before correction",
-    Component = "Age",
-    Variance =
-      global_raw$Age_unique * 100
-  ),
-  
-  data.frame(
-    Correction = "After SVA",
-    Component = "Age",
-    Variance =
-      global_sva$Age_unique * 100
-  )
-)
-
-
-global_plot$Correction <- factor(
-  global_plot$Correction,
-  levels = c(
-    "Before correction",
-    "After SVA"
-  )
-)
-
-
-pdf(
-  "Results/Figures/global_variance_dataset_age_before_after_SVA.pdf",
-  width = 5,
-  height = 4
-)
-
-print(
-  ggplot(
-    global_plot,
-    aes(
-      x = Correction,
-      y = Variance,
-      group = Component,
-      shape = Component
-    )
-  ) +
-    geom_line() +
-    geom_point(
-      size = 3
-    ) +
-    theme_classic() +
-    labs(
-      x = NULL,
-      y = "Transcriptome-wide variance explained (%)",
-      shape = NULL
-    )
-)
-
-dev.off()
 

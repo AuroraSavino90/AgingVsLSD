@@ -380,13 +380,6 @@ type[c(6,7,8)]<-"Negative Control"
 df<-data.frame(pup_diff= -df$pup+df_rev$pup, pdn_diff= -df$pdn+df_rev$pdn, dataset=dataset,
                type=type)
 
-pdf("Results/Figures/All_psychedelicsAndCTRL.pdf",6.5,5.5)
-ggplot(df, aes(x=pup_diff, y=pdn_diff, label=dataset, colour=type))+geom_point()+geom_text_repel()+
-  theme_classic()+
-  geom_vline(aes(xintercept= 0), colour="red", linetype="dashed")+
-  geom_hline(aes(yintercept= 0), colour="red", linetype="dashed")+
-  scale_colour_manual(values=c("Positive Control"="#8E24AA", "Negative Control"="#F57C00", "Psychoplastogen"="black"))
-dev.off()
 
 
 ###################

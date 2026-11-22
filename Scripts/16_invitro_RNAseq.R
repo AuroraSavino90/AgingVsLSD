@@ -155,27 +155,6 @@ ssgsea_par <- ssgseaParam(as.matrix(invitro_RPM), list(up=Abeta_genes_up,dn=Abet
 ssgsea <- gsva(ssgsea_par)
 
 library(ggside)
-df<-data.frame(up=ssgsea[1,], dn=ssgsea[2,], metadata)
-df$Trt<-factor(df$Trt, levels=c("Ct", "LSD", "Abeta + LSD", "Abeta"))
-
-pdf("results/Figures/invitro_Abeta_revert_sep_rep_005.pdf", 15, 7)
-ggplot(df, aes(x=up, y=dn, colour=as.factor(Trt)))+geom_point(size=3)+facet_grid(~Replicate)+theme_bw()
-dev.off()
-
-
-pdf("results/Figures/invitro_Abeta_revert_sep_005.pdf", 9, 8)
-ggplot(df, aes(x=up, y=dn, colour=Trt, fill=Trt))+geom_point(size=3)+geom_xsidedensity(alpha = .3) +
-  geom_ysidedensity(alpha = .3)+theme_classic()+
-  theme(
-    ggside.panel.border = element_blank(),
-    ggside.panel.grid = element_blank(),
-    ggside.panel.background = element_blank(),
-    ggside.axis.text = element_blank(),
-    ggside.axis.ticks = element_blank(),
-    ggside.axis.line = element_blank(),
-    ggside.panel.scale = .3
-  ) 
-dev.off()
 
 invitro_RPM_sel<-invitro_RPM[c(Abeta_genes_up, Abeta_genes_dn),]
 pca<-PCA(t(invitro_RPM_sel))
