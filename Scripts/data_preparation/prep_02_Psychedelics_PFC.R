@@ -3,29 +3,11 @@
 #
 # Regenerates the differential-expression (DE) tables of psychedelics and other
 # fast-acting antidepressants in prefrontal cortex that downstream scripts load
-# from "Data/original_RData_notclosed/Psychedelics_PFC.RData" (00_LSD_DEGs.R, 09_age_reversal_otherpsychedelics.R,
-# 10_GSEA_integrated_otherpsychedelics.R, save_mean_logFC_selected_genes.R),
+# from "Data/original_RData_notclosed/Psychedelics_PFC.RData" 
 # plus the LSD count matrix GSE179379 used by 00_LSD_DEGs.R.
 #
-# Provenance: the original Data/Psychedelics_PFC.RData is an RStudio workspace
-# dump (no save() call exists). It was produced interactively by the old scripts
-# (not distributed):
-#   Psychedelics_PFC.R  - reading/preprocessing of every dataset (changenames)
-#   DEGs_PFC.R          - DE computation (DExpr limma function, DESeq2)
-# (Psychedelics_alldata_RAW_PFC.R is a later variant of the same code that adds
-#  a count filter before DESeq2; the dump matches DEGs_PFC.R, i.e. no filter.)
-# The dump also holds datasets/objects not used downstream (GSE47541, GSE73800,
-# GSE172074 pig psilocybin, ...); they are not regenerated here.
 #
-# Input data (RAW_DIR, default Data/raw_data_notclosed/psychedelics_GEO):
-#   GSE161626  DOI, mouse PFC neurons, RNA-seq (per-sample count .txt + series matrix)
-#   GSE14720   DOI, rat PFC, TIFR-Rat-8X15K (series matrix + GPL8160_noParents.an.txt)
-#   GSE23728   DOI, rat PFC, TIFR-Rat-8X15K (series matrix + GPL8160_noParents.an.txt)
-#   GSE81672   ketamine, mouse PFC, RNA-seq (HTSeq counts xlsx + series matrix)
-#   GSE26364   ketamine, mouse PFC, MoGene 1.0 ST (CEL files, RMA + GPL6246 annotation)
-#   GSE179379  LSD, mouse PFC, RNA-seq (Raw_gene_counts_matrix.txt)
-#   GSE179380  LSD, rat PFC, RG_U34A (Matrix_rma.xlsx + GPL85-10790_data.txt)
-#   GSE209859  psilocybin, mouse frontal cortex, RNA-seq (GSE209859_counts.csv.gz)
+# Input data (RAW_DIR, default Data/raw_data_notclosed/psychedelics_GEO)
 # Non-public input data (RAW_CLOSED_DIR, default Data/raw_data_closed/psychedelics):
 #   MDMA data/PREFRONTAL CORTEX/PF1-9.CEL  MDMA, mouse PFC, Mouse 430 2.0 arrays (non-GEO, RMA)
 #   readcount copy 2.xlsx  DMT / pharmahuasca / harmaline, rat PFC, RNA-seq (unpublished)
@@ -39,9 +21,6 @@
 #   Without the non-public data (RAW_CLOSED_DIR missing or incomplete) DE_MDMA and
 #   DE_DMT, DE_pharm, DE_harm are left out (the analysis always reads the deposited
 #   input RData, which contain them: run_all.R).
-# Computed but not saved: DE_GSE14720 (never used downstream) and DE_GSE179379
-#   (the LSD DE table used in the paper is recomputed by 00_LSD_DEGs.R and
-#   saved to Results/RData/DE_GSE179379.RData).
 #
 # Run from the project root:  Rscript Scripts/data_preparation/prep_02_Psychedelics_PFC.R
 # Paths can be overridden with the environment variables RAW_DIR, RAW_CLOSED_DIR,
@@ -103,7 +82,7 @@ get_series <- function(gse, getGPL = FALSE) {
 }
 
 # -----------------------------------------------------------------------------
-# Functions copied verbatim from the original scripts
+# Functions
 # -----------------------------------------------------------------------------
 
 # Probe/gene ID -> symbol; for duplicated symbols keep the row with highest mean
@@ -150,20 +129,14 @@ DExpr<-function(cond1, cond2){
 }
 
 # -----------------------------------------------------------------------------
-# Ensembl ID -> symbol tables. The original queried the live Ensembl BioMart
-# (useMart("ensembl") and, for rat, useEnsembl(mirror = "useast")), so symbols
-# depend on the release. The tables left in the original workspace (mouse
-# mgi_symbol, 52,332 pairs; rat rgd_symbol, 33,606 pairs) are identical to
-# Ensembl 107 (Jul 2022). ensembl_release_map() rebuilds the getBM() result of
-# that release from the Ensembl FTP; getBM(filters = 'ensembl_gene_id', values)
-# is the same table restricted to the given IDs.
+# Ensembl ID -> symbol tables. 
 # -----------------------------------------------------------------------------
 source("Scripts/data_preparation/ensembl_release_map.R")
 map.mouse <- ensembl_release_map(ENSEMBL_RELEASE, "mmusculus",   ENSEMBL_CACHE)
 map.rat   <- ensembl_release_map(ENSEMBL_RELEASE, "rnorvegicus", ENSEMBL_CACHE)
 
 # =============================================================================
-# Preprocessing (Psychedelics_PFC.R)
+# Preprocessing
 # =============================================================================
 
 ## MDMA (mouse 430 2.0 CEL files, RMA) ----------------------------------------
@@ -191,7 +164,7 @@ rownames(data)<-rownames(countdata)
 colnames(data)<-files
 GSE161626<-data
 
-# all mouse genes (getBM without filter, as in the original)
+# all mouse genes
 geni_coord<-map.mouse
 annotation_sel=geni_coord[match((rownames(GSE161626)), geni_coord[,1]),2]
 GSE161626<-changenames(GSE161626, anno=cbind(rownames(GSE161626), annotation_sel))

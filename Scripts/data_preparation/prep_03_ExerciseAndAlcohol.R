@@ -4,30 +4,6 @@
 # Regenerates the differential-expression (DE) tables of the non-psychedelic
 # interventions (exercise / enriched environment / cognitive performance and
 # alcohol) that downstream scripts load from "Data/original_RData_notclosed/ExerciseAndAlcohol.RData"
-# (09_age_reversal_otherpsychedelics.R, 10_GSEA_integrated_otherpsychedelics.R,
-#  12_dementia_cohen.R, 19_GO_revert_dementia.R, save_mean_logFC_selected_genes.R).
-#
-# Provenance: the original Data/ExerciseAndAlcohol.RData is an RStudio workspace
-# dump (no save() call exists). Its DE objects were produced interactively by the
-# old scripts in Discarded_scripts/Download data/:
-#   Exercise.R  - download/preprocessing (getGEO, changenames, DExpr), DE_GSE64607
-#   Alcohol.R / Controls.R - DE_GSE72507_0, DE_GSE60676_0, DE_GSE28515_C57
-#   Controls.R  - DE_GSE111273_Y/O and DE_GSE164798_chronic (DESeq2)
-# (The dump also held DE_GSE105453_Y/O, cognitive performance; that dataset is
-#  not part of the paper and is no longer computed.)
-# The dump also holds aging datasets and plotting leftovers that downstream
-# scripts do not take from this file; they are not regenerated here.
-#
-# GEO accessions (Mus musculus):
-#   GSE64607  voluntary running, lateral entorhinal cortex, day 28 (array, limma)
-#   GSE72507  chronic intermittent ethanol, PFC, 0 h (array, limma)
-#   GSE60676  ethanol (array, limma)
-#   GSE28515  ethanol vs saline, C57 (array, limma)
-#   GSE111273 enriched environment vs none, 5 / 24 months (counts, DESeq2)
-#   GSE164798 30-day wheel running vs untreated, C57BL/6 (counts, DESeq2)
-#
-# Output (OUT_FILE): DE_GSE111273_O, DE_GSE111273_Y, DE_GSE164798_chronic, DE_GSE28515_C57, DE_GSE60676_0,
-#   DE_GSE64607, DE_GSE72507_0
 #
 # Run from the project root:  Rscript Scripts/data_preparation/prep_03_ExerciseAndAlcohol.R
 # Paths can be overridden with the environment variables RAW_DIR and OUT_FILE.
@@ -36,7 +12,7 @@
 RAW_DIR  <- Sys.getenv("RAW_DIR",  "Data/raw_data_notclosed/exercise_alcohol_GEO")  # GEO files
 OUT_FILE <- Sys.getenv("OUT_FILE", "Data/regenerated/ExerciseAndAlcohol.RData")
 # Ensembl release used for the Ensembl -> MGI symbol mapping of GSE111273
-# (the original used the then-current Ensembl via useMart; see note below).
+
 ENSEMBL_RELEASE <- as.integer(Sys.getenv("ENSEMBL_RELEASE", "107"))
 ENSEMBL_CACHE   <- Sys.getenv("ENSEMBL_CACHE", "Data/ensembl")
 
@@ -53,7 +29,7 @@ suppressPackageStartupMessages({
 })
 
 # -----------------------------------------------------------------------------
-# Functions from the original scripts (verbatim except the eBayes legacy flag)
+# Functions
 # -----------------------------------------------------------------------------
 
 # Probe/gene ID -> symbol; for duplicated symbols keep the row with highest mean
@@ -98,8 +74,7 @@ DExpr <- function(cond1, cond2){
   return(tT)
 }
 
-# Series matrix (with GPL annotation) from GEO, cached in RAW_DIR. A local copy
-# is read directly (getGEO(GSE) would query the GEO file listing every time).
+# Series matrix (with GPL annotation) from GEO, cached in RAW_DIR. 
 get_series <- function(gse){
   f <- file.path(RAW_DIR, paste0(gse, "_series_matrix.txt.gz"))
   if(file.exists(f)) return(getGEO(filename = f, destdir = RAW_DIR, AnnotGPL = TRUE))
@@ -116,7 +91,7 @@ get_suppl <- function(gse, fname){
 }
 
 # -----------------------------------------------------------------------------
-# Microarray datasets (limma, Exercise.R / Alcohol.R)
+# Microarray datasets
 # -----------------------------------------------------------------------------
 
 ## GSE64607 - voluntary running vs saline vehicle, lateral entorhinal cortex, day 28
@@ -151,12 +126,7 @@ DE_GSE28515_C57 <- DExpr(GSE28515[, trt], GSE28515[, ctrl])
 
 # -----------------------------------------------------------------------------
 # GSE111273 - enriched environment vs none, 5 and 24 months (DESeq2)
-# Ensembl gene IDs mapped to MGI symbols. The original used
-#   getBM(c("ensembl_gene_id", "mgi_symbol"), filters = "ensembl_gene_id",
-#         values = rownames(GSE111273), mart = useMart("ensembl", ...))
-# on the live Ensembl; the table left in the original workspace (43,926 pairs)
-# is identical to Ensembl 107 (Jul 2022). ensembl_release_map() rebuilds that
-# release's table from the Ensembl FTP (see ensembl_release_map.R).
+# Ensembl gene IDs mapped to MGI symbols. 
 # -----------------------------------------------------------------------------
 GSE111273_meta <- pData(get_series("GSE111273"))
 GSE111273 <- read.csv(get_suppl("GSE111273", "GSE111273_sample_counts.txt.gz"), sep = "\t")

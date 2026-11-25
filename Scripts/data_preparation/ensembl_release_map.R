@@ -1,20 +1,21 @@
 ################################################################################
 # ensembl_release_map.R
 #
-# Ensembl gene ID -> gene symbol table of a fixed Ensembl release, identical to
-#   getBM(attributes = c("ensembl_gene_id", "<symbol>_symbol"),
-#         mart = useEnsembl("ensembl", "<species>_gene_ensembl", version = <release>))
+# Code to obtain or load the ensembl gene symbol mapping tables used in the project
 #
-# The original scripts queried the live Ensembl BioMart (useMart("ensembl")),
-# so the symbols depend on the release that was current at the time
-#
-# The BioMart archive sites of old releases are often unreachable, so the table
-# is rebuilt from the BioMart database dump of that release on the Ensembl FTP
-# (permanent, https://ftp.ensembl.org/pub/release-<N>/mysql/ensembl_mart_<N>/):
+# Old BioMart archive sites are often unreachable, so the table is rebuilt
+# from that release's BioMart database dump on the Ensembl FTP
+# (https://ftp.ensembl.org/pub/release-<N>/mysql/ensembl_mart_<N>/):
 #   <species>_gene_ensembl__gene__main.txt.gz      gene key -> Ensembl gene ID
 #   <species>_gene_ensembl__ox_<db>__dm.txt.gz     gene key -> symbol (HGNC/MGI/RGD)
-# Genes without a symbol get "" (as in getBM). The files are downloaded once
-# into CACHE_DIR and the table is cached there as a tab-separated file.
+# Genes without a symbol get "" (as in getBM).
+#
+# Local files are used first, in cache_dir (default Data/ensembl/):
+#   1. ensembl<N>_<species>_<db>_symbol.tsv   final table: read and returned
+#   2. ensembl_mart_<N>_<table>.txt.gz         dumps: used to build the table
+#   3. the dumps are downloaded from the FTP only if missing locally
+# Data/ensembl/ already holds the tables and dumps for releases 105, 107 and
+# 115, so the pipeline runs offline.
 ################################################################################
 
 ensembl_release_map <- function(release, species = c("hsapiens", "mmusculus", "rnorvegicus"),

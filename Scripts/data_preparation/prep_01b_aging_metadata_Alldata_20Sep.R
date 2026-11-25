@@ -8,9 +8,7 @@
 ##   GEO_DIR     GEO series matrices downloaded in 2022 (sample annotations)
 ##   GTEX_COUNTS GTEx v8 gene read counts, frontal cortex BA9 (Data/); GTEx_PFC
 ##               is built from it as in Scripts/00_GTEx_filt.R, with the HGNC
-##               symbols of Ensembl 107 (the release of the 2022 file
-##               GTEx_RPM_PFC_filt.RData used for Alldata_20Sep.RData; the copy
-##               regenerated in 2025 has newer symbols and 31,756 genes)
+##               symbols of Ensembl 107
 ##   GTEX_SUBJ   GTEx v8 subject phenotypes (Data/)
 ##   GTEX_SAMP   GTEx v8 sample attributes (GTEx portal)
 ##   GSE33000 and GPL4372 are read from DOWNLOAD_DIR (Data/raw_data_notclosed/dementia_GEO).
@@ -18,7 +16,7 @@
 ##
 ## Notes reproduced from the original file
 ##   - Ages are in days (some datasets were converted with 356 instead of
-##     365 days per year, as in the original code).
+##     365 days per year).
 ##   - Column names of GSE17612, GSE21935, GSE22570, GSE37981, GSE71620 and
 ##     GSE125681 do not match metadata$Sample. None of these datasets has
 ##     DLPFC/PFC healthy samples, so they are never selected in the analyses.
@@ -68,13 +66,7 @@ GSE64810_meta    <- series_meta("GSE64810_series_matrix.txt.gz")
 GSE5388_meta     <- series_meta("GSE5388_series_matrix.txt.gz")
 GSE161986_meta   <- series_meta("GSE161986_series_matrix.txt.gz")
 GSE21138_meta    <- series_meta("GSE21138_series_matrix.txt.gz")
-GSE17612_meta    <- series_meta("GSE17757_series_matrix.txt.gz") # as in the original
-# Related series whose samples overlap with the datasets above. In
-# Aging_meta.R their annotation blocks also filled fields of those samples,
-# because match() returns the first row with that sample name:
-#   GSE17757 (same samples as GSE17612) -> fills GSE17612 rows
-#   GSE5392 (superseries of GSE5388 + GSE5390) -> fills GSE5388/GSE5390 rows;
-#   its own rows are removed in section 7
+GSE17612_meta    <- series_meta("GSE17757_series_matrix.txt.gz") 
 GSE17757_meta    <- GSE17612_meta
 GSE5392_meta     <- series_meta("GSE5392_series_matrix.txt.gz")
 GSE49376_meta    <- series_meta("GSE49376_series_matrix.txt.gz")
@@ -95,7 +87,7 @@ GSE92538_GPL17027_meta <- read.csv(g("GSE92538-GPL17027_series_matrix_meta.txt")
 # GTEx_PFC = Results/RData/GTEx_RPM_PFC_filt.RData of 2022: log2(RPM + 1),
 # without the 10% of samples with the highest mitochondrial read counts and
 # without genes expressed in fewer than 10 samples (same code as 00_GTEx_filt.R)
-source("Scripts/utilities.R")                         # changenames(), as in 00_GTEx_filt.R
+source("Scripts/utilities.R")                        
 source("Scripts/data_preparation/ensembl_release_map.R")
 GTEx_PFC <- fread(GTEX_COUNTS, data.table = FALSE)
 rownames(GTEx_PFC) <- GTEx_PFC[, 2]
@@ -124,7 +116,7 @@ age_bin[age_bin == "60-69"] <- 5
 age_bin[age_bin == "70-79"] <- 6
 
 #####################################################################
-## 3. Metadata table (Aging_meta.R)
+## 3. Metadata table
 ## One row per sample; Sample = sample names of each dataset as in the GEO
 ## series matrices (GSM IDs) or in the processed files.
 #####################################################################
@@ -348,7 +340,7 @@ metadata$Region[match(GSE99349_meta[,2], metadata$Sample)]<-"DLPFC"
 metadata$Diagnosis[match(GSE99349_meta[,2], metadata$Sample)]<-GSE99349_meta$characteristics_ch1.1
 
 #####################################################################
-## 4. Harmonisation of the annotations (Aging_meta.R)
+## 4. Harmonisation of the annotations
 #####################################################################
 ## Controls -> "Healthy"; samples without a diagnosis are controls
 metadata$Diagnosis[metadata$Diagnosis %in% c("case/control: Unaffected Control", "Control", "CTRL", "CTL", "Healthy control", "Neurologically normal", "non-psychiatric controls (CON)", "control", "healthy", "CONT")]<-"Healthy"
@@ -436,7 +428,7 @@ metadata$Region_simpl[metadata$Region_simpl=="OPFC"]<-"OFC"
 metadata$Region_simpl[is.na(metadata$Region_simpl)]<-"Other"
 
 #####################################################################
-## 5. GSE37981, added after the harmonisation (Rename_genes.R)
+## 5. GSE37981, added after the harmonisation
 #####################################################################
 add_meta<-data.frame(matrix(nrow=ncol(GSE37981), ncol=length(categories)))
 colnames(add_meta)<-categories
@@ -451,7 +443,7 @@ add_meta$Region_simpl<-NA
 metadata<-rbind.data.frame(metadata, add_meta)
 
 #####################################################################
-## 6. Sample names of the expression matrices (Fix_alldata.R)
+## 6. Sample names of the expression matrices
 #####################################################################
 colnames(GSE161986)<-unlist(strsplit( colnames(GSE161986), "_"))[seq(1,ncol(GSE161986)*2,2)]
 colnames(GSE11512)<-gsub("[.]CEL[.]gz", "", colnames(GSE11512))
@@ -465,7 +457,7 @@ colnames(GSE5390)<-gsub("[.]cel[.]gz", "", colnames(GSE5390))
 colnames(GSE92538_GPL17027)<-GSE92538_GPL17027_meta[1,-1]
 
 #####################################################################
-## 7. Filters and recoding (Fix_alldata.R)
+## 7. Filters and recoding
 #####################################################################
 ## GTEx: keep the samples present in GTEx_PFC
 metadata<-metadata[!metadata$Sample %in% setdiff(metadata$Sample[metadata$Dataset=="E_PFC"], colnames(GTEx_PFC)),]
@@ -495,7 +487,7 @@ metadata$Smoke[metadata$Smoke %in% c("Y")]<-"Yes"
 metadata$Smoke[metadata$Smoke %in% c("U")]<-NA
 
 #####################################################################
-## 8. GSE33000 (Fix_alldata.R)
+## 8. GSE33000
 #####################################################################
 changenames<-function(data, anno){
   annotation_sel=anno[match( rownames(data), anno[,1]),2]

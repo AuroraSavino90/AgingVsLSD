@@ -3,20 +3,11 @@
 ## datasets contained in Data/Alldata_20Sep.RData
 #####################################################################
 ## Provenance
-## Data/Alldata_20Sep.RData was built in 2022 with a chain of scripts that
-## were run interactively and saved as workspace images:
-##   Aging_additional.R / Aging_PFC.R  (GEO series matrices, processed files)
-##   Raw_data.R                         (raw CEL / Illumina files, RMA / neqc)
-##   Rename_genes.R                     (probe -> gene symbol)
-##   Aging_meta.R                       (sample metadata)
-##   -> Aging_alldata27Apr.RData
-##   Fix_alldata.R                      (sample names, filters, GSE33000, GTEx)
-##   -> Alldata_20Sep.RData
-## This script and prep_01b_* rewrite that chain for the datasets that end up
-## in Alldata_20Sep.RData, with the same processing. Checked against the
-## original objects: identical (max abs difference < 1e-13) for all
-## datasets, including the five with Ensembl IDs (section 1), which use the
-## gene symbols of Ensembl 105, the release used by the original scripts.
+## Data/Alldata_20Sep.RData was built in 2022 
+
+## This script and prep_01b_* generate Data/Alldata_20Sep.RData, originally built in 2022,
+##  with the same processing. Checked against the
+## original objects: identical (max abs difference < 1e-13) for all datasets.
 ##
 ## Input: GEO_DIR, a folder with the files downloaded from GEO
 ##   - <GSE>_RAW folders with CEL files (or <GSE>/<GSE>_RAW)
@@ -36,9 +27,7 @@
 # Settings can be overridden with environment variables of the same name.
 GEO_DIR  <- Sys.getenv("GEO_DIR", "Data/raw_data_notclosed/aging_GEO")
 OUT_FILE <- Sys.getenv("OUT_FILE", "Data/regenerated/aging_expression.RData")
-# Ensembl release used for Ensembl ID -> HGNC symbol (section 1). The original
-# queried the live Ensembl BioMart; its ID-symbol tables (left in the original
-# workspace) are identical to Ensembl 105 (Dec 2021). See ensembl_release_map.R.
+# Ensembl release used for Ensembl ID -> HGNC symbol (section 1). 
 ENSEMBL_RELEASE <- as.integer(Sys.getenv("ENSEMBL_RELEASE", "105"))
 ENSEMBL_CACHE   <- Sys.getenv("ENSEMBL_CACHE", "Data/ensembl")
 
@@ -50,7 +39,7 @@ suppressMessages({
 })
 
 # Probe -> gene symbol; for duplicated symbols keeps the probe with the
-# highest mean expression (same function used in all original scripts)
+# highest mean expression 
 changenames <- function(data, anno){
   annotation_sel = anno[match(rownames(data), anno[,1]), 2]
   if(length(which(annotation_sel == "")) > 0){
@@ -84,7 +73,6 @@ series_anno <- function(file, annot = TRUE){
 
 #####################################################################
 ## 1. Datasets with Ensembl gene IDs: HGNC symbols of Ensembl 105
-## (same table as getBM(c('ensembl_gene_id','hgnc_symbol')) on that release)
 #####################################################################
 source("Scripts/data_preparation/ensembl_release_map.R")
 ens_map <- ensembl_release_map(ENSEMBL_RELEASE, "hsapiens", ENSEMBL_CACHE)
@@ -101,8 +89,6 @@ GSE59288_H <- read.csv(g("GSE59288_exp_mRNA.txt.gz"), sep = "\t", row.names = 1)
 ids <- ens_symbols(rownames(GSE59288_H))
 GSE59288_H <- changenames(data = GSE59288_H, anno = cbind(rownames(GSE59288_H), ids[match(rownames(GSE59288_H), ids[,1]), 2]))
 GSE59288_H <- log2(GSE59288_H + 1)
-# The original object is log-transformed twice (log2(log2(x+1)+1)), probably
-# because the log2 line was run twice interactively. Reproduced as it is; the
 # dataset (34 ASD samples, superior frontal gyrus) is never selected by the
 # analyses (healthy samples only).
 GSE59288_H <- log2(GSE59288_H + 1)
@@ -125,10 +111,8 @@ ids <- ens_symbols(rownames(GSE174409))
 GSE174409 <- changenames(data = GSE174409, anno = cbind(rownames(GSE174409), ids[match(rownames(GSE174409), ids[,1]), 2]))
 
 #####################################################################
-## 2. Affymetrix 3' arrays: raw CEL files, affy::rma (Raw_data.R),
-##    gene symbols from the annotation of a GEO series (Rename_genes.R).
-##    Note: GSE11512 is annotated with the GSE5392 table and GSE17612 with
-##    the GSE161986 table, as in the original code.
+## 2. Affymetrix 3' arrays: raw CEL files, affy::rma,
+##    gene symbols from the annotation of a GEO series
 #####################################################################
 affy_sets <- list(
   GSE37981  = c(cel = "GSE37981/GSE37981_RAW",   anno = "GSE37981_series_matrix.txt.gz"),
@@ -165,7 +149,7 @@ raw  <- read.celfiles(list.files(g("GSE71620_RAW"), full.names = TRUE))
 anno <- series_anno("GSE71620_series_matrix.txt.gz")
 GSE71620 <- changenames(data = exprs(oligo::rma(raw)), anno = cbind(as.character(anno$ID), anno$`Gene symbol`))
 
-# GSE92538, HG-U133A arrays only (GPL17027 subset), GSE5392 annotation
+# GSE92538, HG-U133A arrays 
 cel  <- list.files(g("GSE92538_RAW"), pattern = "cel")
 cel  <- cel[grep("_133A_", cel)]
 raw  <- read.celfiles(g("GSE92538_RAW", cel))
@@ -173,7 +157,7 @@ anno <- series_anno("GSE5392_series_matrix.txt.gz")
 GSE92538_GPL17027 <- changenames(data = exprs(oligo::rma(raw)), anno = cbind(as.character(anno$ID), anno$`Gene symbol`))
 
 #####################################################################
-## 4. Illumina arrays: neqc normalisation (Raw_data.R)
+## 4. Illumina arrays: neqc normalisation
 #####################################################################
 # GSE60190: non-normalised intensities + detection p-values
 raw <- read.csv(g("GSE60190", "GSE60190_non-normalized.txt"), sep = "\t", row.names = 1)
@@ -181,20 +165,20 @@ GSE60190 <- neqc(as.matrix(raw[, seq(1, 266, 2)]), detection.p = as.matrix(raw[,
 anno <- series_anno("GSE60190_series_matrix.txt.gz")
 GSE60190 <- changenames(data = GSE60190, anno = cbind(as.character(anno$ID), anno$`Gene symbol`))
 
-# GSE49376: rows are already gene symbols; rows with NA removed (Rename_genes.R)
+# GSE49376: rows are already gene symbols; rows with NA removed 
 raw <- read.csv(g("GSE49376", "GSE49376_non-normalized.txt"), sep = "\t", row.names = 1)
 GSE49376 <- neqc(as.matrix(raw[, seq(1, 95, 2)]), detection.p = as.matrix(raw[, seq(2, 96, 2)]))
 GSE49376 <- GSE49376[rowSums(is.na(GSE49376)) == 0,]
 
-# GSE125681: idat files, kept as a limma EList with probe IDs, as in the
-# original (no sample of this dataset is "Healthy", so it is not used in the
+# GSE125681: idat files, kept as a limma EList with probe IDs 
+#(no sample of this dataset is "Healthy", so it is not used in the
 # aging analyses). Column names are the idat file paths.
 idat <- list.files(g("GSE125681_RAW"), pattern = "idat$")
 GSE125681 <- neqc(read.idat(g("GSE125681_RAW", idat),
                             bgxfile = g("GSE125681_RAW", "GPL10558_HumanHT-12_V4_0_R1_15002873_B.txt.gz")))
 
 #####################################################################
-## 5. Processed supplementary files (Aging_additional.R)
+## 5. Processed supplementary files
 #####################################################################
 # GSE30272: cleaned expression matrix, custom platform annotation
 GSE30272 <- read.csv(g("GSE30272_ExprsMtxCleanedN269_31SVN.txt.gz"), sep = "\t", row.names = 1)

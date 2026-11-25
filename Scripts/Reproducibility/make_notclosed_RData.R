@@ -14,8 +14,27 @@
 # After saving, the new file is reloaded and every object is checked to have the same
 # serialized content as the original one.
 # Data/original_RData/ is only read. The four RData must not yet exist in Data/original_RData_notclosed/.
+#
+#   Rscript Scripts/Reproducibility/make_notclosed_RData.R corrected
+#
+# Corrected pipeline (Script_corrected/): copies the three *_corrected.RData written by
+# Script_corrected/make_corrected_RData.R (Alldata_20Sep, ExerciseAndAlcohol,
+# Dementia_alldata_meta; no non-public data) unchanged into Data/original_RData_notclosed/.
 ################################################################################
 src <- "Data/original_RData"; dest <- "Data/original_RData_notclosed"
+corrected <- identical(commandArgs(trailingOnly = TRUE), "corrected")
+if (corrected) {
+  files <- c("Alldata_20Sep_corrected.RData", "ExerciseAndAlcohol_corrected.RData",
+             "Dementia_alldata_meta_corrected.RData")
+  stopifnot(all(file.exists(file.path(src, files))))
+  if (any(file.exists(file.path(dest, files)))) stop(dest, " already has the corrected RData")
+  for (f in files) {
+    stopifnot(file.copy(file.path(src, f), file.path(dest, f), copy.date = TRUE))
+    stopifnot(unname(tools::md5sum(file.path(src, f)) == tools::md5sum(file.path(dest, f))))
+    message(f, ": copied unchanged")
+  }
+  quit(save = "no")
+}
 files  <- c("Alldata_20Sep.RData", "ExerciseAndAlcohol.RData", "Dementia_alldata_meta.RData",
             "Psychedelics_PFC.RData")
 closed <- c("MDMA", "DMT")   # raw data of the non-public datasets in Psychedelics_PFC.RData
