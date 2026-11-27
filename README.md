@@ -12,7 +12,7 @@ paper, without an internet connection. It is distributed in two parts:
 - **the code**, in this GitHub repository (https://github.com/AuroraSavino90/AgingVsLSD):
   `run_all.R`, `Scripts/`, `Threshold_sensitivity/`, `Threshold_sensitivity_invivo/`
   and this README;
-- **the data**, in the Zenodo record https://zenodo.org/records/8431269: the folder
+- **the data**, in the Zenodo record https://zenodo.org/records/24435460: the folder
   `Data/`, with the input data, the four input RData files used for the paper, the
   distributed intermediate files and the R packages for the offline installation.
 
@@ -46,7 +46,7 @@ Contents:
    Put it in a folder outside Dropbox, OneDrive or similar services (the data take about
    20 GB, the results of a run about 8 GB more).
 
-2. **Data.** Download all the files of the Zenodo record https://zenodo.org/records/8431269
+2. **Data.** Download all the files of the Zenodo record https://zenodo.org/records/24435460
    (about 20 GB) and extract them into the repository folder, so that `Data/` sits next to
    `run_all.R` and `Scripts/`:
 
@@ -183,8 +183,9 @@ files: newer downloads give slightly different gene symbols.
   and platform tables (`GPL5175.soft.gz`, `GPL6947.annot.gz`);
 - `ACEL-17-e12819-s002.csv`;
 - `cmap/` (in `Data/original_RData_notclosed/`): CMap (LINCS) input of
-  `08_2_random_drugs.R`, prepared by `08_1_cMAP_data.R` from the local LINCS gctx file
-  (`CMAP_NPC_mean.RData`, `compounds_NPC.RData`).
+  `08_2_random_drugs.R`, prepared by `08_1_cMAP_data.R` from the LINCS gctx file
+  (`CMAP_NPC_mean.RData`, `compounds_NPC.RData`). The gctx file is not distributed: to run
+  `08_1`, download it from GEO into `Data/raw_data_notclosed/` (section 7).
 
 **Non-public data**: MDMA, DMT, pharmahuasca, harmaline and MSBB (section 5).
 
@@ -304,8 +305,14 @@ pharmahuasca and harmaline from `Data/original_RData_notclosed/Psychedelics_PFC.
 (section 5).
 
 Not run by the pipeline: `08_1_cMAP_data.R`, which prepares `Data/original_RData_notclosed/cmap/` from the
-LINCS gctx file of GSE70138 (`Data/raw_data_notclosed/`, 17 GB; rhdf5, no clue.io key or internet).
+LINCS gctx file of GSE70138 (rhdf5, no clue.io key or internet).
 It is optional: on 22/11/2026 it rebuilt both files identically (`identical()` on the objects).
+The gctx file (17 GB) is not in the Zenodo record, because of its size. To run `08_1`, download
+`GSE70138_Broad_LINCS_Level4_ZSPCINF_mlr12k_n345976x12328_2017-03-06.gctx.gz` from GEO
+(https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE70138, supplementary files), extract it
+and put `GSE70138_Broad_LINCS_Level4_ZSPCINF_mlr12k_n345976x12328.gctx` in
+`Data/raw_data_notclosed/`. The two annotation files it also reads
+(`GSE70138_Broad_LINCS_inst_info.txt`, `GSE92742_Broad_LINCS_gene_info.txt`) are in the record.
 
 The scripts start with `setwd("workdir")`: `run_script.R` turns it into a no-op and
 runs each script in the run folder, which contains `Data/` (links) and `Results/`.
